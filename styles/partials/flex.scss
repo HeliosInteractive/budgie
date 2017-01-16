@@ -1,0 +1,22 @@
+//Container
+.infinite-container-flex{
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+.infinite-container-flex--vertical{
+  @extend .infinite-container-flex
+}
+.infinite-container-flex--horizontal{
+  @extend .infinite-container-flex
+}
+
+//Items
+.infinite-flex-item{
+  //flex: 1 0 300px;
+  width: 20vw;
+  height: 10vh;
+}
