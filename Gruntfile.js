@@ -19,21 +19,33 @@ module.exports = function(grunt){
       },
       dist: {
         src: ['js/**/*.js'],
-        dest: 'dist/<%= pkg.name %>.js'
+        dest: 'dist/<%= pkg.name %>.concat.js'
       }
     },
 
     uglify: {
       options: {
+        sourceMap : true,
+        sourceMapName : 'dist/<%= pkg.name %>.es6.map',
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
       },
       dist: {
         files: {
-          'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+          'dist/<%= pkg.name %>.min.js': ['dist/<%= pkg.name %>.js']
         }
       }
     },
-
+    babel: {
+      options: {
+        sourceMap: true,
+        presets: ['babel-preset-es2015']
+      },
+      dist: {
+        files: {
+          'dist/<%= pkg.name %>.js': '<%= concat.dist.dest %>'
+        }
+      }
+    },
     jshint: {
       files: ['Gruntfile.js', 'js/**/*.js'],
     },
@@ -57,5 +69,5 @@ module.exports = function(grunt){
 
   grunt.registerTask('default', ['jshint','build'])
   grunt.registerTask('dev', ['connect','watch'])
-  grunt.registerTask('build', ['concat', 'uglify', 'sass'])
+  grunt.registerTask('build', ['concat', 'babel', 'uglify', 'sass'])
 }

@@ -1,5 +1,7 @@
 //Container
 .infinite-container-flex{
+  width: 100%;
+  height: 100%;
   padding: 0;
   margin: 0;
   display: flex;
@@ -16,7 +18,15 @@
 
 //Items
 .infinite-flex-item{
-  //flex: 1 0 300px;
-  width: 20vw;
-  height: 10vh;
+  flex-grow: 0;
+}
+
+////////////////////////////
+// for testing only
+body {
+  background-color: grey;
+}
+.main {
+  width: 70vw;
+  background-content: green;
 }
