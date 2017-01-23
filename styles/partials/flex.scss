@@ -1,5 +1,5 @@
 //Container
-.infinite-container-flex{
+.infinite-flex-container{
   width: 100%;
   height: 100%;
   padding: 0;
@@ -9,11 +9,12 @@
   align-items: center;
   justify-content: center;
 }
-.infinite-container-flex--vertical{
-  @extend .infinite-container-flex
+
+.infinite-flex-container--vertical{
+  @extend .infinite-flex-container
 }
-.infinite-container-flex--horizontal{
-  @extend .infinite-container-flex
+.infinite-flex-container--horizontal{
+  @extend .infinite-flex-container
 }
 
 //Items
@@ -28,5 +29,7 @@ body {
 }
 .main {
   width: 70vw;
+  height: 30vh;
   background-content: green;
+  overflow: hidden;
 }
