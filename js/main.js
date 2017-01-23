@@ -19,7 +19,10 @@ let infinity = function(images, selector, options = {}) {
     'direction': 'vertical',
     'secondsOnPage': 1.0,
     'stopOnHover': false,
-    'inverted': false
+    'inverted': false,
+    'duplicateToFill': false,
+    'scrollMode': true,
+    'userNavigation': false
   }
 
   options = Object.assign(defaultOptions, options)
@@ -117,14 +120,37 @@ function getElements(selector) {
   }
 }
 
+function infinityReplace(elementArray) {
+  elementArray.forEach(function(e){
+    [].map.call(getElements('.infinite-' + e.id), function(element){ element.style.backgroundImage = 'url(' + e.url + ')'})
+  })
+}
+
+function infinityAdd(elementArray) {
+
+}
+
+function infinityRemove(elementArray) {
+  // need to recalculate sizes at this point.
+  elementArray.forEach(function(e){
+    let elements = getElements('.infinite-' + e.id)
+
+    if (elements.length < 1)
+      return;
+
+    for(let i = elements.length; i > 0; i--) {
+      elements[(i-1)].parentNode.removeChild(elements[(i-1)]);
+    }
+  })
+}
+
 function imageElement(imgPath, index, options){
   let e = document.createElement('div');
   e.style.backgroundImage = 'url(' + imgPath + ')';
   e.className += ' infinite-flex-item'
-  e.id = 'infinite-' + index;
+  e.className += ' infinite-' + index;
   return e;
 }
-
 
 function setScrollerCSS(element, options){
   let eleWidth = parseInt(window.getComputedStyle(element).width);
@@ -166,17 +192,29 @@ function startScroll(scrollingElement, scrollerSize, options) {
   }, 1000/fps)
 }
 
-
+//////////////
+// TESTING
+//////////////
 let options = {
-  'numberHigh': 2,
+  'numberHigh': 3,
   'numberWide': 2,
   'clipOddEnding': true,
   'secondsOnPage': 5.0,
-  'direction': 'horizontal',
+  'direction': 'vertical',
   'inverted': true
 }
-infinity(testImages, '.main', options)
 console.log(options)
 
-// To get the width of the flex-item in VW
-// =width/columns/width * 100
+infinity(testImages, '.main', options)
+//
+setTimeout(function () {
+  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/009c0c'}, {'id':7, 'url':'http://placehold.it/350x150/009c0c'}, {'id':6, 'url':'http://placehold.it/350x150/009c0c'}, {'id':3, 'url':'http://placehold.it/350x150/009c0c'}])
+}, 5000)
+//
+setTimeout(function () {
+  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/6e009c'}, {'id':7, 'url':'http://placehold.it/350x150/6e009c'}, {'id':6, 'url':'http://placehold.it/350x150/6e009c'}, {'id':3, 'url':'http://placehold.it/350x150/6e009c'}])
+}, 10000)
+
+setTimeout(function () {
+  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':7, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':6, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':3, 'url':'http://placehold.it/350x150/FFFF00'}])
+}, 15000)

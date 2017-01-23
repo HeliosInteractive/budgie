@@ -26,10 +26,11 @@
 // for testing only
 body {
   background-color: grey;
+  margin: 0 0 0 0;
 }
 .main {
-  width: 70vw;
-  height: 30vh;
+  width: 100vw;
+  height: 50vh;
   background-content: green;
   overflow: hidden;
 }
