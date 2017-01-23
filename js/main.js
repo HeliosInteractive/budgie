@@ -156,10 +156,6 @@ function startScroll(scrollingElement, scrollerSize, options) {
     'horizontal':'marginLeft'
   }
 
-  console.log(marginSelector[options.direction])
-
-  console.log(viewMeasure)
-
   setInterval(function() {
     let marginChange = options.inverted ? (currentMargin += scrollSpeed) : (currentMargin -= scrollSpeed)
     scrollingElement.style[marginSelector[options.direction]] = marginChange + 'px';
