@@ -293,25 +293,25 @@ let options = {
   'numberWide': 3,
   'clipOddEnding': true,
   'secondsOnPage': 5.0,
-  'direction': 'horizontal',
+  'direction': 'vertical',
   'inverted': true
 }
 
 infinity(testItems, '.main', options)
-//
-// setTimeout(function () {
-//   redraw(testItems2)
-// }, 5000)
-//
-// setTimeout(function () {
-//   redraw(testItems3)
-// }, 10000)
-//
-// setTimeout(function () {
-//   redraw(testItems)
-// }, 15000)
-//
-// setTimeout(function () {
-//   redraw(testItems3)
-// }, 20000)
-//
+
+setTimeout(function () {
+  redraw(testItems2)
+}, 5000)
+
+setTimeout(function () {
+  redraw(testItems3)
+}, 10000)
+
+setTimeout(function () {
+  redraw(testItems)
+}, 15000)
+
+setTimeout(function () {
+  redraw(testItems3)
+}, 20000)
+
