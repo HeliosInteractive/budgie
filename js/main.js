@@ -5,10 +5,9 @@
 * @param {string} selector - This can be a class or an id
 * @param {object} options - All the optional arguments
 */
-
-let testImages = ['http://placehold.it/350x150/660090','http://placehold.it/350x150/550099','http://placehold.it/350x150/440000','http://placehold.it/350x150/3300ff','http://placehold.it/350x150/2200ee','http://placehold.it/350x150/660000','http://placehold.it/350x150/1100bb','http://placehold.it/350x150/660000','http://placehold.it/350x150/770034','http://placehold.it/350x150/880000','http://placehold.it/350x150/9900f0','http://placehold.it/350x150/0f0011','http://placehold.it/350x150/800320','http://placehold.it/350x150/0670f1','http://placehold.it/350x150/362000']
-
 let infinity = function(images, selector, options = {}) {
+  window.InfinityScroller = {'selector':selector, 'options':options, 'length':images.length}
+
   images = options.inverted ? images.reverse() : images
 
   const defaultOptions = {
@@ -22,10 +21,12 @@ let infinity = function(images, selector, options = {}) {
     'inverted': false,
     'duplicateToFill': false,
     'scrollMode': true,
-    'userNavigation': false
+    'userNavigation': false,
+    'new': true
   }
 
   options = Object.assign(defaultOptions, options)
+  console.log(options)
 
   let ele = getElements(selector)[0]
   ele.className += ' infinite-flex-container-parent'
@@ -41,17 +42,22 @@ let infinity = function(images, selector, options = {}) {
   if(options.clipOddEnding)
     images = trimImagesArray(images, options)
 
-  images.forEach(function(image, index){
-    scrollerDiv.appendChild(imageElement(image, index))
+  images.forEach(function(image){
+    scrollerDiv.appendChild(imageElement(image))
   })
 
-  let scrollerSize = measureScrollSection(images.length, options)
   let elementsOnScreen = parseInt(options.numberHigh) * parseInt(options.numberWide)
 
   if(images.length > elementsOnScreen)
     appendFillerElements(scrollerDiv, elementsOnScreen)
   
-  startScroll(scrollerDiv, scrollerSize, options)
+  startScroll(images.length, options)
+}
+
+function removeInfinity(){
+  window.clearInterval(InfinityScroller.interval)
+  getElements(InfinityScroller.selector)[0].className = getElements(InfinityScroller.selector)[0].className.replace('infinite-flex-container-parent', '')
+  getElements(InfinityScroller.selector)[0].removeChild(getElements('.infinite-flex-container')[0])
 }
 
 function trimImagesArray(images, options){
@@ -144,11 +150,11 @@ function infinityRemove(elementArray) {
   })
 }
 
-function imageElement(imgPath, index, options){
+function imageElement(element, options){
   let e = document.createElement('div');
-  e.style.backgroundImage = 'url(' + imgPath + ')';
+  e.style.backgroundImage = 'url(' + element.url + ')';
   e.className += ' infinite-flex-item'
-  e.className += ' infinite-' + index;
+  e.className += ' infinite-' + element.id;
   return e;
 }
 
@@ -170,34 +176,67 @@ function setScrollerCSS(element, options){
   document.styleSheets[0].insertRule('.infinite-flex-container-parent{overflow: hidden;}', numOfSheets);
 }
 
-function startScroll(scrollingElement, scrollerSize, options) {
+// Switches the inverted flag to change the direction
+function changeInversion(){
+  InfinityScroller.options.inverted = !InfinityScroller.options.inverted
+  InfinityScroller.options.new = false
+  startScroll(InfinityScroller.length, InfinityScroller.options)
+}
+
+function startScroll(length, options) {
   const fps = 60;
-
-  let currentMargin = options.inverted ? -scrollerSize : 0;
-  let viewMeasure = viewPortMeasurement(options)
-  let scrollSpeed = viewMeasure / options.secondsOnPage / fps
-
-  let marginSelector = {
+  const marginSelector = {
     'vertical':'marginTop',
     'horizontal':'marginLeft'
   }
 
-  setInterval(function() {
+  let scrollerSize = measureScrollSection(length, options)
+  let scrollingElement = getElements('.infinite-flex-container')[0]
+  let currentMargin;
+
+  if(options.new)
+    currentMargin = options.inverted ? -scrollerSize : 0;
+  else
+    currentMargin = parseFloat(scrollingElement.style[marginSelector[options.direction]])
+
+  let viewMeasure = viewPortMeasurement(options)
+  let scrollSpeed = viewMeasure / options.secondsOnPage / fps
+
+  // always clear interval to ensure that only one scroller is running
+  window.clearInterval(InfinityScroller.interval)
+  InfinityScroller.interval = setInterval(function() {
     let marginChange = options.inverted ? (currentMargin += scrollSpeed) : (currentMargin -= scrollSpeed)
     scrollingElement.style[marginSelector[options.direction]] = marginChange + 'px';
     if((!options.inverted && currentMargin <= -scrollerSize) || (options.inverted && currentMargin >= 0))
       currentMargin = options.inverted ? -scrollerSize : 0;
       scrollingElement.style[marginSelector[options.direction]] = currentMargin + 'px';
-
   }, 1000/fps)
 }
 
 //////////////
 // TESTING
 //////////////
+let testImages = [
+  {'id':1, 'url':'http://placehold.it/350x150/660090'},
+  {'id':2, 'url':'http://placehold.it/350x150/400090'},
+  {'id':3, 'url':'http://placehold.it/350x150/550099'},
+  {'id':4, 'url':'http://placehold.it/350x150/3300ff'},
+  {'id':5, 'url':'http://placehold.it/350x150/2200ee'},
+  {'id':6, 'url':'http://placehold.it/350x150/1100bb'},
+  {'id':7, 'url':'http://placehold.it/350x150/660000'},
+  {'id':8, 'url':'http://placehold.it/350x150/770034'},
+  {'id':9, 'url':'http://placehold.it/350x150/880000'},
+  {'id':10, 'url':'http://placehold.it/350x150/119c0c'},
+  {'id':11, 'url':'http://placehold.it/350x150/9900f0'},
+  {'id':12, 'url':'http://placehold.it/350x150/0f0011'},
+  {'id':13, 'url':'http://placehold.it/350x150/800320'},
+  {'id':14, 'url':'http://placehold.it/350x150/0670f1'},
+  {'id':15, 'url':'http://placehold.it/350x150/362000'}
+]
+
 let options = {
   'numberHigh': 3,
-  'numberWide': 2,
+  'numberWide': 3,
   'clipOddEnding': true,
   'secondsOnPage': 5.0,
   'direction': 'vertical',
@@ -208,7 +247,7 @@ console.log(options)
 infinity(testImages, '.main', options)
 //
 setTimeout(function () {
-  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/009c0c'}, {'id':7, 'url':'http://placehold.it/350x150/009c0c'}, {'id':6, 'url':'http://placehold.it/350x150/009c0c'}, {'id':3, 'url':'http://placehold.it/350x150/009c0c'}])
+  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/00bcd4'}, {'id':7, 'url':'http://placehold.it/350x150/00bcd4'}, {'id':6, 'url':'http://placehold.it/350x150/00bcd4'}, {'id':3, 'url':'http://placehold.it/350x150/00bcd4'}])
 }, 5000)
 //
 setTimeout(function () {
@@ -218,3 +257,4 @@ setTimeout(function () {
 setTimeout(function () {
   infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':7, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':6, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':3, 'url':'http://placehold.it/350x150/FFFF00'}])
 }, 15000)
+
