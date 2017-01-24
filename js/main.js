@@ -3,9 +3,6 @@
 let infinity = function(items, selector, options = {}) {
   window.InfinityScroller = {'selector':selector, 'options':options, 'length':items.length};
 
-  // invert items list if this is an inverted scroll
-  items = options.inverted ? items.reverse() : items;
-
   const defaultOptions = {
     'numberHigh': 1,
     'numberWide': 1,
@@ -68,20 +65,11 @@ function trimItemsArray(items, options){
 }
 
 function appendFillerElements(scrollingElement, elementsOnScreen) {
-  let dupedElements;
-  if(options.inverted)
-    dupedElements = [].slice.call(getElements('.infinite-flex-item')).reverse().slice(0, elementsOnScreen);
-  else
-    dupedElements = [].slice.call(getElements('.infinite-flex-item'), 0, elementsOnScreen);
+  let dupedElements = [].slice.call(getElements('.infinite-flex-item'), 0, elementsOnScreen);
 
-  if(options.inverted)
-    dupedElements.forEach(function(element){
-      scrollingElement.insertBefore( element.cloneNode(true), scrollingElement.firstChild );
-    })
-  else
-    dupedElements.forEach(function(element){
-      scrollingElement.appendChild(element.cloneNode(true))
-    })
+  dupedElements.forEach(function(element){
+    scrollingElement.appendChild(element.cloneNode(true))
+  })
 }
 
 function measureScrollSection(itemCount, options) {
@@ -134,8 +122,6 @@ function createImageElement(element, id){
 
 function setScrollerCSS(element, options){
   let eleWidth = parseInt(window.getComputedStyle(element).width);
-  // let eleHeight = parseInt(window.getComputedStyle(element).height);
-
   let numOfSheets = document.styleSheets[0].cssRules.length;
 
   // Width in %
@@ -206,8 +192,8 @@ function redraw(images) {
       [].map.call(elements, function (element) {
         element.style.backgroundImage = 'url(' + url + ')';
       })
-      if((options.inverted && elements.length < 2) || (!options.inverted && elements.length == 2) && typeof lastElement === 'undefined') {
-        lastElement = options.inverted ? elements[0] : elements[1]
+      if(elements.length == 2 && typeof lastElement === 'undefined') {
+        lastElement = elements[1]
       }
     } else {
       lastElement.parentNode.insertBefore(createImageElement(url, id), lastElement);
@@ -308,7 +294,7 @@ let options = {
   'clipOddEnding': true,
   'secondsOnPage': 5.0,
   'direction': 'horizontal',
-  'inverted': false
+  'inverted': true
 }
 
 infinity(testItems, '.main', options)
