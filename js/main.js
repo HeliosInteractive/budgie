@@ -1,7 +1,6 @@
 'use strict';
 
 let infinity = function(items, selector, options = {}) {
-  console.log(arguments);
   window.InfinityScroller = {'selector':selector, 'options':options, 'length':items.length};
 
   // invert items list if this is an inverted scroll
@@ -19,7 +18,8 @@ let infinity = function(items, selector, options = {}) {
     'duplicateToFill': false,
     'scrollMode': true,
     'userNavigation': false,
-    'new': true
+    'new': true,
+    'imageFit': 'cover'
   };
 
   options = Object.assign(defaultOptions, options);
@@ -142,7 +142,7 @@ function setScrollerCSS(element, options){
   let width = ((eleWidth / options.numberWide / eleWidth) * 100);
   let height = (100 / options.numberHigh);
 
-  document.styleSheets[0].insertRule('.infinite-flex-item{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
+  document.styleSheets[0].insertRule('.infinite-flex-item{width: ' + width + '%; height: ' + height + '%; background-size: ' + options.imageFit + '}', numOfSheets);
 
   let direction = options.direction === 'horizontal' ? 'column' : 'row'
   document.styleSheets[0].insertRule('.infinite-flex-container{flex-direction: ' + direction + ';}', numOfSheets);
@@ -206,16 +206,14 @@ function redraw(images) {
       [].map.call(elements, function (element) {
         element.style.backgroundImage = 'url(' + url + ')';
       })
-      if(elements.length < 2 && typeof lastElement === 'undefined') {
-        lastElement = elements[0];
-        console.log(lastElement)
+      if((options.inverted && elements.length < 2) || (!options.inverted && elements.length == 2) && typeof lastElement === 'undefined') {
+        lastElement = options.inverted ? elements[0] : elements[1]
       }
     } else {
       lastElement.parentNode.insertBefore(createImageElement(url, id), lastElement);
     }
   })
   if(previousLength > images.length){
-    console.log('removing elements')
     for(let i=previousLength; i>images.length; i--){
       let element = document.getElementsByClassName('infinite-' + (i-1))[0];
       if(element){
@@ -309,26 +307,25 @@ let options = {
   'numberWide': 3,
   'clipOddEnding': true,
   'secondsOnPage': 5.0,
-  'direction': 'vertical',
-  'inverted': true
-}
-let options2 = {
-  'numberHigh': 3,
-  'numberWide': 3,
-  'clipOddEnding': true,
-  'secondsOnPage': 5.0,
-  'direction': 'vertical',
-  'inverted': false,
-  'new': false
+  'direction': 'horizontal',
+  'inverted': false
 }
 
 infinity(testItems, '.main', options)
-
-setTimeout(function () {
-  redraw(testItems2)
-}, 5000)
-
-setTimeout(function () {
-  redraw(testItems3)
-}, 10000)
-
+//
+// setTimeout(function () {
+//   redraw(testItems2)
+// }, 5000)
+//
+// setTimeout(function () {
+//   redraw(testItems3)
+// }, 10000)
+//
+// setTimeout(function () {
+//   redraw(testItems)
+// }, 15000)
+//
+// setTimeout(function () {
+//   redraw(testItems3)
+// }, 20000)
+//
