@@ -40,8 +40,8 @@ let infinity = function(items, selector, options = {}) {
     items = trimItemsArray(items, options)
 
   // Create elements
-  items.forEach(function(item){
-    infiniteFlexContainer.appendChild(itemElement(item))
+  items.forEach(function(item, id){
+    infiniteFlexContainer.appendChild(createImageElement(item, id))
   })
 
   // Append duplicate to allow for smooth transitions
@@ -124,35 +124,11 @@ function getElements(selector) {
   }
 }
 
-function infinityReplace(elementArray) {
-  elementArray.forEach(function(e){
-    [].map.call(getElements('.infinite-' + e.id), function(element){ element.style.backgroundImage = 'url(' + e.url + ')'})
-  })
-}
-
-function infinityAdd(elementArray) {
-
-}
-
-function infinityRemove(elementArray) {
-  // need to recalculate sizes at this point.
-  elementArray.forEach(function(e){
-    let elements = getElements('.infinite-' + e.id)
-
-    if (elements.length < 1)
-      return;
-
-    for(let i = elements.length; i > 0; i--) {
-      elements[(i-1)].parentNode.removeChild(elements[(i-1)]);
-    }
-  })
-}
-
-function itemElement(element, options){
+function createImageElement(element, id){
   let e = document.createElement('div');
-  e.style.backgroundImage = 'url(' + element.url + ')';
+  e.style.backgroundImage = 'url(' + element + ')';
   e.className += ' infinite-flex-item'
-  e.className += ' infinite-' + element.id;
+  e.className += ' infinite-' + (id);
   return e;
 }
 
@@ -181,6 +157,7 @@ function changeInversion(){
   startScroll(InfinityScroller.length, InfinityScroller.options)
 }
 
+// Start the interval scroll
 function startScroll(length, options) {
   const fps = 60;
   const marginSelector = {
@@ -211,27 +188,121 @@ function startScroll(length, options) {
   }, 1000/fps)
 }
 
+function redraw(images) {
+  let previousLength = InfinityScroller.length
+  let lastElement;
+
+  InfinityScroller.options.new = false
+  InfinityScroller.length = images.length
+  let options = InfinityScroller.options
+
+  //TODO Handle images array being an odd length
+  if(options.clipOddEnding)
+    images = trimItemsArray(images, options)
+
+  images.forEach(function(url, id) {
+    let elements = document.getElementsByClassName('infinite-' + id);
+    if (elements.length > 0) {
+      [].map.call(elements, function (element) {
+        element.style.backgroundImage = 'url(' + url + ')';
+      })
+      if(elements.length < 2 && typeof lastElement === 'undefined') {
+        lastElement = elements[0];
+        console.log(lastElement)
+      }
+    } else {
+      lastElement.parentNode.insertBefore(createImageElement(url, id), lastElement);
+    }
+  })
+  if(previousLength > images.length){
+    console.log('removing elements')
+    for(let i=previousLength; i>images.length; i--){
+      let element = document.getElementsByClassName('infinite-' + (i-1))[0];
+      if(element){
+        element.parentNode.removeChild(element);
+      }
+    }
+  }
+
+  window.clearInterval(InfinityScroller.interval)
+  startScroll(images.length, options)
+}
+
 //////////////
 // TESTING
 //////////////
+
 let testItems = [
-  {'id':1, 'url':'http://placehold.it/350x150/660090'},
-  {'id':2, 'url':'http://placehold.it/350x150/400090'},
-  {'id':3, 'url':'http://placehold.it/350x150/550099'},
-  {'id':4, 'url':'http://placehold.it/350x150/3300ff'},
-  {'id':5, 'url':'http://placehold.it/350x150/2200ee'},
-  {'id':6, 'url':'http://placehold.it/350x150/1100bb'},
-  {'id':7, 'url':'http://placehold.it/350x150/660000'},
-  {'id':8, 'url':'http://placehold.it/350x150/770034'},
-  {'id':9, 'url':'http://placehold.it/350x150/880000'},
-  {'id':10, 'url':'http://placehold.it/350x150/119c0c'},
-  {'id':11, 'url':'http://placehold.it/350x150/9900f0'},
-  {'id':12, 'url':'http://placehold.it/350x150/0f0011'},
-  {'id':13, 'url':'http://placehold.it/350x150/800320'},
-  {'id':14, 'url':'http://placehold.it/350x150/0670f1'},
-  {'id':15, 'url':'http://placehold.it/350x150/362000'}
+  'http://placehold.it/350x150/660090',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/880000',
+  'http://placehold.it/350x150/119c0c',
+  'http://placehold.it/350x150/9900f0',
+  'http://placehold.it/350x150/0f0011',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/0670f1',
+  'http://placehold.it/350x150/362000'
 ]
 
+let testItems2 = [
+  'http://placehold.it/350x150/660090',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/880000',
+  'http://placehold.it/350x150/119c0c',
+  'http://placehold.it/350x150/9900f0',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/880000',
+  'http://placehold.it/350x150/119c0c',
+  'http://placehold.it/350x150/9900f0',
+  'http://placehold.it/350x150/0f0011',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/0670f1',
+  'http://placehold.it/350x150/362000'
+]
+
+let testItems3 = [
+  'http://placehold.it/350x150/660090',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/880000',
+  'http://placehold.it/350x150/119c0c',
+  'http://placehold.it/350x150/9900f0',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/0670f1',
+  'http://placehold.it/350x150/362000'
+]
 
 let options = {
   'numberHigh': 3,
@@ -241,18 +312,23 @@ let options = {
   'direction': 'vertical',
   'inverted': true
 }
+let options2 = {
+  'numberHigh': 3,
+  'numberWide': 3,
+  'clipOddEnding': true,
+  'secondsOnPage': 5.0,
+  'direction': 'vertical',
+  'inverted': false,
+  'new': false
+}
 
 infinity(testItems, '.main', options)
-//
-setTimeout(function () {
-  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/00bcd4'}, {'id':7, 'url':'http://placehold.it/350x150/00bcd4'}, {'id':6, 'url':'http://placehold.it/350x150/00bcd4'}, {'id':3, 'url':'http://placehold.it/350x150/00bcd4'}])
-}, 5000)
-//
-setTimeout(function () {
-  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/6e009c'}, {'id':7, 'url':'http://placehold.it/350x150/6e009c'}, {'id':6, 'url':'http://placehold.it/350x150/6e009c'}, {'id':3, 'url':'http://placehold.it/350x150/6e009c'}])
-}, 10000)
 
 setTimeout(function () {
-  infinityReplace([{'id':12, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':7, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':6, 'url':'http://placehold.it/350x150/FFFF00'}, {'id':3, 'url':'http://placehold.it/350x150/FFFF00'}])
-}, 15000)
+  redraw(testItems2)
+}, 5000)
+
+setTimeout(function () {
+  redraw(testItems3)
+}, 10000)
 
