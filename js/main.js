@@ -1,220 +1,264 @@
+window.Infinite = {
+  Scrollers: []
+}
+
 'use strict';
 
-let infinity = function(items, selector, options = {}) {
-  window.InfinityScroller = {'selector':selector, 'options':options, 'length':items.length};
+class InfiniteScroller {
+  constructor(items, selector, options = {}) {
+    this.selector = selector;
+    this.options = Object.assign(this.constructor.defaultOptions(), options);
+    this.items = new InfiniteArray(...items);
+    this.isNew = true
 
-  const defaultOptions = {
-    'numberHigh': 1,
-    'numberWide': 1,
-    'clipOddEnding': false,
-    'noScrollIfNoOverflow': true,
-    'direction': 'vertical',
-    'secondsOnPage': 1.0,
-    'stopOnHover': false,
-    'inverted': false,
-    'duplicateToFill': false,
-    'scrollMode': true,
-    'userNavigation': false,
-    'new': true,
-    'imageFit': 'cover'
-  };
+    this.position = Infinite.Scrollers.length;
+    this.items.infiniteCollectionPosition = this.position;
+    Infinite.Scrollers.push(this)
 
-  options = Object.assign(defaultOptions, options);
-
-  // get parent container
-  let parentContainer = getElements(selector)[0];
-  parentContainer.className += ' infinite-flex-container-parent';
-
-  // create scroller container
-  let infiniteFlexContainer = document.createElement('div');
-  infiniteFlexContainer.className += ' infinite-flex-container';
-  parentContainer.appendChild(infiniteFlexContainer);
-  setScrollerCSS(infiniteFlexContainer, options);
-
-  // Trim the item array to prevent odd endings
-  // TODO update this to instead duplicate the items until there is no longer an odd ending
-  if(options.clipOddEnding)
-    items = trimItemsArray(items, options)
-
-  // Create elements
-  items.forEach(function(item, id){
-    infiniteFlexContainer.appendChild(createImageElement(item, id))
-  })
-
-  // Append duplicate to allow for smooth transitions
-  let elementsOnScreen = parseInt(options.numberHigh) * parseInt(options.numberWide)
-  if(items.length > elementsOnScreen)
-    appendFillerElements(infiniteFlexContainer, elementsOnScreen)
-  
-  startScroll(items.length, options)
-}
-
-function removeInfinity(){
-  window.clearInterval(InfinityScroller.interval)
-  getElements(InfinityScroller.selector)[0].className = getElements(InfinityScroller.selector)[0].className.replace('infinite-flex-container-parent', '')
-  getElements(InfinityScroller.selector)[0].removeChild(getElements('.infinite-flex-container')[0])
-}
-
-function trimItemsArray(items, options){
-  var numberAcross = (options.direction === 'horizontal') ? options.numberHigh : options.numberWide
-  let remaining = (items.length % numberAcross)
-  if(remaining > 0)
-    return items.slice(0, items.length - remaining)
-  else
-    return items
-}
-
-function appendFillerElements(scrollingElement, elementsOnScreen) {
-  let dupedElements = [].slice.call(getElements('.infinite-flex-item'), 0, elementsOnScreen);
-
-  dupedElements.forEach(function(element){
-    scrollingElement.appendChild(element.cloneNode(true))
-  })
-}
-
-function measureScrollSection(itemCount, options) {
-  if(options.direction === 'vertical')
-    return elementMeasurement(options) * ((itemCount/options.numberWide));
-  else if(options.direction === 'horizontal')
-    return elementMeasurement(options) * ((itemCount/options.numberHigh));
-  else
-    throw new Error("Only vertical, and horizontal directions are accepted.")
-}
-
-function elementMeasurement(options) {
-  if(options.direction === 'vertical')
-    return parseFloat(window.getComputedStyle(getElements('.infinite-flex-item')[0]).height);
-  else if(options.direction === 'horizontal')
-    return parseFloat(window.getComputedStyle(getElements('.infinite-flex-item')[0]).width);
-  else
-    throw new Error("Only vertical, and horizontal directions are accepted.")
-}
-
-function viewPortMeasurement(options) {
-  if(options.direction === 'vertical')
-    return parseFloat(window.getComputedStyle(getElements('.infinite-flex-container')[0]).height);
-  else if(options.direction === 'horizontal')
-    return parseFloat(window.getComputedStyle(getElements('.infinite-flex-container')[0]).width);
-  else
-    throw new Error("Only vertical, and horizontal directions are accepted.")
-}
-
-function getElements(selector) {
-  let splitSelector = selector.split(/(\.|#)/,3)
-  splitSelector.shift()
-  switch(splitSelector[0]){
-    case '.':
-      return document.getElementsByClassName(splitSelector[1])
-    case '#':
-      return document.getElementById(splitSelector[1])
-    default:
-      throw new Error("The selector must be a class or id, prepended by the identifier ('.'/'#')")
-  }
-}
-
-function createImageElement(element, id){
-  let e = document.createElement('div');
-  e.style.backgroundImage = 'url(' + element + ')';
-  e.className += ' infinite-flex-item'
-  e.className += ' infinite-' + (id);
-  return e;
-}
-
-function setScrollerCSS(element, options){
-  let eleWidth = parseInt(window.getComputedStyle(element).width);
-  let numOfSheets = document.styleSheets[0].cssRules.length;
-
-  // Width in %
-  let width = ((eleWidth / options.numberWide / eleWidth) * 100);
-  let height = (100 / options.numberHigh);
-
-  document.styleSheets[0].insertRule('.infinite-flex-item{width: ' + width + '%; height: ' + height + '%; background-size: ' + options.imageFit + '}', numOfSheets);
-
-  let direction = options.direction === 'horizontal' ? 'column' : 'row'
-  document.styleSheets[0].insertRule('.infinite-flex-container{flex-direction: ' + direction + ';}', numOfSheets);
-
-  document.styleSheets[0].insertRule('.infinite-flex-container-parent{overflow: hidden;}', numOfSheets);
-}
-
-// Switches the inverted flag to change the direction
-function changeInversion(){
-  InfinityScroller.options.inverted = !InfinityScroller.options.inverted
-  InfinityScroller.options.new = false
-  startScroll(InfinityScroller.length, InfinityScroller.options)
-}
-
-// Start the interval scroll
-function startScroll(length, options) {
-  const fps = 60;
-  const marginSelector = {
-    'vertical':'marginTop',
-    'horizontal':'marginLeft'
+    this.start()
   }
 
-  let scrollerSize = measureScrollSection(length, options)
-  let scrollingElement = getElements('.infinite-flex-container')[0]
-  let currentMargin;
+  static defaultOptions() {
+    return {
+      'numberHigh': 1,
+      'numberWide': 1,
+      'clipOddEnding': false,
+      'noScrollIfNoOverflow': true,
+      'direction': 'vertical',
+      'secondsOnPage': 1.0,
+      'stopOnHover': false,
+      'inverted': false,
+      'duplicateToFill': false,
+      'scrollMode': true,
+      'userNavigation': false,
+      'imageFit': 'cover'
+    };
+  }
 
-  if(options.new)
-    currentMargin = options.inverted ? -scrollerSize : 0;
-  else
-    currentMargin = parseFloat(scrollingElement.style[marginSelector[options.direction]])
+  static getElements(selector) {
+    let splitSelector = selector.split(/(\.|#)/,3)
+    splitSelector.shift()
+    switch(splitSelector[0]){
+      case '.':
+        return document.getElementsByClassName(splitSelector[1])
+      case '#':
+        return document.getElementById(splitSelector[1])
+      default:
+        throw new Error("The selector must be a class or id, prepended by the identifier ('.'/'#')")
+    }
+  }
 
-  let viewMeasure = viewPortMeasurement(options)
-  let scrollSpeed = viewMeasure / options.secondsOnPage / fps
+  setupContainer() {
+    let parentContainer = this.constructor.getElements(this.selector)[0];
+    parentContainer.className += ' infinite-flex-container-parent-' + this.position;
 
-  // always clear interval to ensure that only one scroller is running
-  window.clearInterval(InfinityScroller.interval)
-  InfinityScroller.interval = setInterval(function() {
-    let marginChange = options.inverted ? (currentMargin += scrollSpeed) : (currentMargin -= scrollSpeed)
-    scrollingElement.style[marginSelector[options.direction]] = marginChange + 'px';
-    if((!options.inverted && currentMargin <= -scrollerSize) || (options.inverted && currentMargin >= 0))
-      currentMargin = options.inverted ? -scrollerSize : 0;
-      scrollingElement.style[marginSelector[options.direction]] = currentMargin + 'px';
-  }, 1000/fps)
-}
+    let infiniteFlexContainer = document.createElement('div');
+    infiniteFlexContainer.className += ' infinite-flex-container infinite-container-' + this.position;
+    parentContainer.appendChild(infiniteFlexContainer);
+    this.setCSS(infiniteFlexContainer);
 
-function redraw(images) {
-  let previousLength = InfinityScroller.length
-  let lastElement;
+    this.container = infiniteFlexContainer;
+  }
 
-  InfinityScroller.options.new = false
-  InfinityScroller.length = images.length
-  let options = InfinityScroller.options
+  createItemList(){
+    let numberAcross = (this.options.direction === 'horizontal') ? this.options.numberHigh : this.options.numberWide
+    let remaining = (this.items.length % numberAcross)
+    if(remaining > 0)
+      this.items = this.items.slice(0, this.items.length - remaining)
+    else
+      this.items = this.items
+  }
 
-  //TODO Handle images array being an odd length
-  if(options.clipOddEnding)
-    images = trimItemsArray(images, options)
+  setCSS(container){
+    let eleWidth = parseInt(window.getComputedStyle(container).width);
+    let numOfSheets = document.styleSheets[0].cssRules.length;
 
-  images.forEach(function(url, id) {
-    let elements = document.getElementsByClassName('infinite-' + id);
-    if (elements.length > 0) {
-      [].map.call(elements, function (element) {
-        element.style.backgroundImage = 'url(' + url + ')';
+    // Width in %
+    let width = ((eleWidth / this.options.numberWide / eleWidth) * 100);
+    let height = (100 / this.options.numberHigh);
+
+    document.styleSheets[0].insertRule('.infinite-flex-item-'  + this.position + '{width: ' + width + '%; height: ' + height + '%; background-size: ' + this.options.imageFit + '}', numOfSheets);
+
+    let direction = this.options.direction === 'horizontal' ? 'column' : 'row'
+    document.styleSheets[0].insertRule('.infinite-container-'  + this.position + '{flex-direction: ' + direction + ';}', numOfSheets);
+
+    document.styleSheets[0].insertRule('.infinite-flex-container-parent-'  + this.position + '{overflow: hidden;}', numOfSheets);
+  }
+
+  static createItemAsImage(item, id, position){
+    let e = document.createElement('div');
+    e.style.backgroundImage = 'url(' + item + ')';
+    e.className += ' infinite-flex-item-' + position
+    e.className += ' infinite-' + position + '-' + (id);
+    return e;
+  }
+
+  insertItems(){
+    var self = this
+    this.items.forEach(function(item, id){
+      self.container.appendChild(self.constructor.createItemAsImage(item, id, self.position))
+    })
+  }
+
+  appendExtraItems(){
+    var self = this;
+    let elementsOnScreen = parseInt(this.options.numberHigh) * parseInt(this.options.numberWide)
+
+    if(this.items.length > elementsOnScreen){
+      let dupedElements = [].slice.call(self.constructor.getElements('.infinite-flex-item-' + self.position), 0, elementsOnScreen);
+
+      dupedElements.forEach(function(element){
+        self.container.appendChild(element.cloneNode(true))
       })
-      if(elements.length == 2 && typeof lastElement === 'undefined') {
-        lastElement = elements[1]
-      }
-    } else {
-      lastElement.parentNode.insertBefore(createImageElement(url, id), lastElement);
-    }
-  })
-  if(previousLength > images.length){
-    for(let i=previousLength; i>images.length; i--){
-      let element = document.getElementsByClassName('infinite-' + (i-1))[0];
-      if(element){
-        element.parentNode.removeChild(element);
-      }
     }
   }
 
-  window.clearInterval(InfinityScroller.interval)
-  startScroll(images.length, options)
+  elementMeasurement(selector){
+    let measure = {}
+    measure.height = parseFloat(window.getComputedStyle(this.constructor.getElements(selector)[0]).height);
+    measure.width = parseFloat(window.getComputedStyle(this.constructor.getElements(selector)[0]).width);
+    return measure
+  }
+
+  scrollSizeMeasurement(){
+    var self = this;
+    switch(this.options.direction){
+      case 'vertical':
+        return self.elementMeasurement('.infinite-flex-item-' + self.position).height * ((this.items.length/this.options.numberWide));
+      case 'horizontal':
+        return self.elementMeasurement('.infinite-flex-item-' + self.position).width * ((this.items.length/this.options.numberHigh));
+    }
+  }
+
+  changeInversion(){
+    this.options.inverted = !this.options.inverted
+  }
+
+  startAnimation() {
+    var self = this;
+
+    const fps = 60;
+    const marginSelector = {
+      'vertical':'marginTop',
+      'horizontal':'marginLeft'
+    }
+
+    let scrollContainerSize = this.scrollSizeMeasurement()
+    let scrollContainer = this.container
+    let currentMargin;
+
+    if(this.isNew)
+      currentMargin = this.options.inverted ? -scrollContainerSize : 0;
+    else
+      currentMargin = parseFloat(scrollContainer.style[marginSelector[this.options.direction]])
+
+    let viewMeasure = (this.options.direction === "horizontal") ?
+      this.elementMeasurement('.infinite-container-' + this.position).width :
+      this.elementMeasurement('.infinite-container-' + this.position).height
+    let scrollSpeed = (viewMeasure / this.options.secondsOnPage / fps);
+
+    // always clear interval to ensure that only one scroller is running
+    this.stop()
+    this.interval = setInterval(function() {
+      let marginChange = self.options.inverted ? (currentMargin += scrollSpeed) : (currentMargin -= scrollSpeed)
+      scrollContainer.style[marginSelector[self.options.direction]] = marginChange + 'px';
+      if((!self.options.inverted && currentMargin <= -scrollContainerSize) || (self.options.inverted && currentMargin >= 0))
+        currentMargin = self.options.inverted ? -scrollContainerSize : 0;
+      scrollContainer.style[marginSelector[self.options.direction]] = currentMargin + 'px';
+    }, 1000/fps)
+  }
+
+  //////////////
+  // Public methods for using the scroller
+  //////////////
+  // start the infinite scroll
+  start() {
+    if(this.isNew){
+      this.setupContainer()
+      this.createItemList()
+      this.insertItems()
+      this.appendExtraItems()
+    }
+    this.startAnimation()
+    this.isNew = false
+  }
+
+  // stop the infinite scroll
+  stop() {
+    if(!this.interval){
+      return;
+    }
+    window.clearInterval(this.interval)
+  }
+
+  remove() {
+    this.stop()
+    this.container.parentElement.className = this.container.parentElement.className.replace(' infinite-flex-container-parent-' + this.position,'')
+    this.container.parentElement.removeChild(this.container)
+    Infinite.Scrollers.pop(this)
+  }
+
+
+  //////////////
+  // 'Private' methods for scroller setup
+  //////////////
+
 }
 
-//////////////
-// TESTING
-//////////////
+class InfiniteArray extends Array {
+  constructor() {
+    super(...arguments)
+  }
+
+  push(){
+
+  }
+  pop(){
+    console.log(this.infiniteCollectionPosition)
+    super.pop()
+  }
+  splice(){}
+}
+
+//
+// function redraw(images) {
+//   let previousLength = InfinityScroller.length
+//   let lastElement;
+//
+//   InfinityScroller.options.new = false
+//   InfinityScroller.length = images.length
+//   let options = InfinityScroller.options
+//
+//   //TODO Handle images array being an odd length
+//   if(options.clipOddEnding)
+//     images = trimItemsArray(images, options)
+//
+//   images.forEach(function(url, id) {
+//     let elements = document.getElementsByClassName('infinite-' + id);
+//     if (elements.length > 0) {
+//       [].map.call(elements, function (element) {
+//         element.style.backgroundImage = 'url(' + url + ')';
+//       })
+//       if(elements.length == 2 && typeof lastElement === 'undefined') {
+//         lastElement = elements[1]
+//       }
+//     } else {
+//       lastElement.parentNode.insertBefore(createImageElement(url, id), lastElement);
+//     }
+//   })
+//   if(previousLength > images.length){
+//     for(let i=previousLength; i>images.length; i--){
+//       let element = document.getElementsByClassName('infinite-' + (i-1))[0];
+//       if(element){
+//         element.parentNode.removeChild(element);
+//       }
+//     }
+//   }
+//
+//   window.clearInterval(InfinityScroller.interval)
+//   startScroll(images.length, options)
+// }
+
 
 let testItems = [
   'http://placehold.it/350x150/660090',
@@ -234,61 +278,7 @@ let testItems = [
   'http://placehold.it/350x150/362000'
 ]
 
-let testItems2 = [
-  'http://placehold.it/350x150/660090',
-  'http://placehold.it/350x150/400090',
-  'http://placehold.it/350x150/550099',
-  'http://placehold.it/350x150/3300ff',
-  'http://placehold.it/350x150/2200ee',
-  'http://placehold.it/350x150/1100bb',
-  'http://placehold.it/350x150/660000',
-  'http://placehold.it/350x150/770034',
-  'http://placehold.it/350x150/880000',
-  'http://placehold.it/350x150/119c0c',
-  'http://placehold.it/350x150/9900f0',
-  'http://placehold.it/350x150/400090',
-  'http://placehold.it/350x150/550099',
-  'http://placehold.it/350x150/3300ff',
-  'http://placehold.it/350x150/2200ee',
-  'http://placehold.it/350x150/1100bb',
-  'http://placehold.it/350x150/660000',
-  'http://placehold.it/350x150/770034',
-  'http://placehold.it/350x150/880000',
-  'http://placehold.it/350x150/119c0c',
-  'http://placehold.it/350x150/9900f0',
-  'http://placehold.it/350x150/0f0011',
-  'http://placehold.it/350x150/800320',
-  'http://placehold.it/350x150/800320',
-  'http://placehold.it/350x150/0670f1',
-  'http://placehold.it/350x150/362000'
-]
-
-let testItems3 = [
-  'http://placehold.it/350x150/660090',
-  'http://placehold.it/350x150/400090',
-  'http://placehold.it/350x150/550099',
-  'http://placehold.it/350x150/3300ff',
-  'http://placehold.it/350x150/2200ee',
-  'http://placehold.it/350x150/1100bb',
-  'http://placehold.it/350x150/660000',
-  'http://placehold.it/350x150/770034',
-  'http://placehold.it/350x150/880000',
-  'http://placehold.it/350x150/119c0c',
-  'http://placehold.it/350x150/9900f0',
-  'http://placehold.it/350x150/400090',
-  'http://placehold.it/350x150/550099',
-  'http://placehold.it/350x150/3300ff',
-  'http://placehold.it/350x150/2200ee',
-  'http://placehold.it/350x150/1100bb',
-  'http://placehold.it/350x150/660000',
-  'http://placehold.it/350x150/770034',
-  'http://placehold.it/350x150/800320',
-  'http://placehold.it/350x150/800320',
-  'http://placehold.it/350x150/0670f1',
-  'http://placehold.it/350x150/362000'
-]
-
-let options = {
+let opts = {
   'numberHigh': 3,
   'numberWide': 3,
   'clipOddEnding': true,
@@ -296,22 +286,16 @@ let options = {
   'direction': 'vertical',
   'inverted': true
 }
+let opts2 = {
+  'numberHigh': 3,
+  'numberWide': 3,
+  'clipOddEnding': true,
+  'secondsOnPage': 5.0,
+  'direction': 'horizontal',
+  'inverted': true
+}
 
-infinity(testItems, '.main', options)
-
-setTimeout(function () {
-  redraw(testItems2)
-}, 5000)
-
-setTimeout(function () {
-  redraw(testItems3)
-}, 10000)
-
-setTimeout(function () {
-  redraw(testItems)
-}, 15000)
-
-setTimeout(function () {
-  redraw(testItems3)
-}, 20000)
-
+new InfiniteScroller(testItems, '.main', opts2)
+new InfiniteScroller(testItems, '.second', opts).changeInversion()
+new InfiniteScroller(testItems, '.third', opts).changeInversion()
+new InfiniteScroller(testItems, '.fourth', opts2).changeInversion()
