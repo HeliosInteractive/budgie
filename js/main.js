@@ -4,49 +4,54 @@ class InfiniteScroller {
   constructor(items, selector, options = {}) {
     this.selector = selector;
     this.options = Object.assign(this.constructor.defaultOptions(), options);
+
     this.isNew = true
     this.position = Math.floor((1 + Math.random()) * 0x10000)
     this.items = items;
     this.items.previousLength = items.length;
     this.adjustedItems = [];
+    this.elements = [];
 
     var self = this;
     this.items.pop = function(){
-      self.arrayMethod('pop')
+      let a = Array.prototype.pop.apply(self.items, arguments);
+      self.adjustElements()
+      return a
     }
     this.items.push = function(){
-      self.arrayMethod('push')
+      let a = Array.prototype.push.apply(self.items, arguments);
+      self.adjustElements()
+      return a
     }
     this.items.shift = function(){
-      self.arrayMethod('shift')
+      let a = Array.prototype.shift.apply(self.items, arguments);
+      self.adjustElements()
+      return a
     }
     this.items.unshift = function(){
-      self.arrayMethod('unshift')
+      let a = Array.prototype.unshift.apply(self.items, arguments);
+      self.adjustElements()
+      return a
     }
     this.items.splice = function(){
-      self.arrayMethod('splice')
+      let a = Array.prototype.splice.apply(self.items, arguments);
+      self.adjustElements()
+      return a
     }
 
     this.start()
-  }
-
-  arrayMethod(method){
-    let a = Array.prototype[method].apply(this.items, arguments);
-    this.adjustElements()
-    return a
   }
 
   static defaultOptions() {
     return {
       'numberHigh': 1,
       'numberWide': 1,
-      'clipOddEnding': false,
+      'oddEndingBehavior': 'default', //'default','duplicate','clip'
       'noScrollIfNoOverflow': true,
       'direction': 'vertical',
       'secondsOnPage': 1.0,
       'stopOnHover': false,
       'inverted': false,
-      'duplicateToFill': false,
       'scrollMode': true,
       'userNavigation': false,
       'imageFit': 'cover'
@@ -79,12 +84,21 @@ class InfiniteScroller {
   }
 
   createItemList(){
+    var self = this;
+    switch(this.options.oddEndingBehavior){
+      case 'duplicate':
+        // todo
+      case 'clip':
+        self.adjustedItems = self.items.slice(0, self.items.length - self.numberLeftWithOddEnding())
+        break;
+      default:
+        self.adjustedItems = self.items;
+    }
+  }
+
+  numberLeftWithOddEnding(){
     let numberAcross = (this.options.direction === 'horizontal') ? this.options.numberHigh : this.options.numberWide
-    let remaining = (this.items.length % numberAcross)
-    if(remaining > 0)
-      this.adjustedItems = this.items.slice(0, this.items.length - remaining)
-    else
-      this.adjustedItems = this.items
+    return (this.items.length % numberAcross)
   }
 
   setCSS(container){
@@ -116,8 +130,12 @@ class InfiniteScroller {
   insertItems(){
     var self = this
     this.adjustedItems.forEach(function(item, id){
-      self.container.appendChild(self.constructor.createItemAsImage(item, id, self.position))
+      self.elements.push(self.constructor.createItemAsImage(item, id, self.position))
+      self.container.appendChild(self.elements[self.elements.length - 1])
     })
+    if(this.numberLeftWithOddEnding() > 0){
+      self.elements[self.elements.length - 1].className += ' infinite-flex-item--clear-' + self.options.direction
+    }
   }
 
   appendExtraItems(){
@@ -136,7 +154,6 @@ class InfiniteScroller {
   adjustElements(){
     var self = this;
     var lastElement;
-console.log(this.adjustedItems.length, this.items.length)
     this.createItemList();
 
     this.adjustedItems.forEach(function(item, id) {
@@ -176,9 +193,9 @@ console.log(this.adjustedItems.length, this.items.length)
     var self = this;
     switch(this.options.direction){
       case 'vertical':
-        return self.elementMeasurement('.infinite-flex-item-' + self.position).height * ((this.adjustedItems.length/this.options.numberWide));
+        return self.elementMeasurement('.infinite-flex-item-' + self.position).height * (Math.ceil(this.adjustedItems.length/this.options.numberWide));
       case 'horizontal':
-        return self.elementMeasurement('.infinite-flex-item-' + self.position).width * ((this.adjustedItems.length/this.options.numberHigh));
+        return self.elementMeasurement('.infinite-flex-item-' + self.position).width * (Math.ceil(this.adjustedItems.length/this.options.numberHigh));
     }
   }
 
