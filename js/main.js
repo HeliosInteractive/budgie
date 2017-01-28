@@ -1,7 +1,3 @@
-window.Infinite = {
-  Scrollers: []
-}
-
 'use strict';
 
 class InfiniteScroller {
@@ -9,36 +5,35 @@ class InfiniteScroller {
     this.selector = selector;
     this.options = Object.assign(this.constructor.defaultOptions(), options);
     this.isNew = true
-    this.position = Infinite.Scrollers.length;
+    this.position = Math.floor((1 + Math.random()) * 0x10000)
     this.items = items;
     this.items.previousLength = items.length;
     this.adjustedItems = [];
 
     var self = this;
-    let arrayMethod = function(method){
-      let a = Array.prototype[method].apply(self.items, arguments);
-      self.adjustElements()
-      return a
-    }
     this.items.pop = function(){
-      arrayMethod('pop')
+      self.arrayMethod('pop')
     }
     this.items.push = function(){
-      arrayMethod('push')
+      self.arrayMethod('push')
     }
     this.items.shift = function(){
-      arrayMethod('shift')
+      self.arrayMethod('shift')
     }
     this.items.unshift = function(){
-      arrayMethod('unshift')
+      self.arrayMethod('unshift')
     }
     this.items.splice = function(){
-      arrayMethod('splice')
+      self.arrayMethod('splice')
     }
 
-    Infinite.Scrollers.push(this)
-
     this.start()
+  }
+
+  arrayMethod(method){
+    let a = Array.prototype[method].apply(this.items, arguments);
+    this.adjustElements()
+    return a
   }
 
   static defaultOptions() {
@@ -141,7 +136,7 @@ class InfiniteScroller {
   adjustElements(){
     var self = this;
     var lastElement;
-
+console.log(this.adjustedItems.length, this.items.length)
     this.createItemList();
 
     this.adjustedItems.forEach(function(item, id) {
@@ -157,11 +152,12 @@ class InfiniteScroller {
         lastElement.parentNode.insertBefore(self.constructor.createItemAsImage(item, id, self.position), lastElement);
       }
     })
-    if(this.adjustedItems.previousLength > this.adjustedItems.length){
-      for(let i = this.adjustedItems.previousLength; i > this.adjustedItems.length; i--){
-        let element = document.getElementsByClassName('infinite-' + self.position + (i-1))[0];
-        if(element){
-          element.parentNode.removeChild(element);
+    if(this.items.previousLength > this.adjustedItems.length){
+      for(let i = this.items.previousLength; i > this.adjustedItems.length; i--){
+        let elements = document.getElementsByClassName('infinite-' + self.position + '-' + (i-1));
+        console.log(elements)
+        for(let e = elements.length; e > 0; e--){
+          elements[e-1].parentNode.removeChild(elements[e-1]);
         }
       }
     }
@@ -271,6 +267,57 @@ let testItems = [
   'http://placehold.it/350x150/0670f1',
   'http://placehold.it/350x150/362000'
 ]
+let testItems2 = [
+  'http://placehold.it/350x150/660090',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/880000',
+  'http://placehold.it/350x150/119c0c',
+  'http://placehold.it/350x150/9900f0',
+  'http://placehold.it/350x150/0f0011',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/0670f1',
+  'http://placehold.it/350x150/362000'
+]
+let testItems3 = [
+  'http://placehold.it/350x150/660090',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/880000',
+  'http://placehold.it/350x150/119c0c',
+  'http://placehold.it/350x150/9900f0',
+  'http://placehold.it/350x150/0f0011',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/0670f1',
+  'http://placehold.it/350x150/362000'
+]
+let testItems4 = [
+  'http://placehold.it/350x150/660090',
+  'http://placehold.it/350x150/400090',
+  'http://placehold.it/350x150/550099',
+  'http://placehold.it/350x150/3300ff',
+  'http://placehold.it/350x150/2200ee',
+  'http://placehold.it/350x150/1100bb',
+  'http://placehold.it/350x150/660000',
+  'http://placehold.it/350x150/770034',
+  'http://placehold.it/350x150/880000',
+  'http://placehold.it/350x150/119c0c',
+  'http://placehold.it/350x150/9900f0',
+  'http://placehold.it/350x150/0f0011',
+  'http://placehold.it/350x150/800320',
+  'http://placehold.it/350x150/0670f1',
+  'http://placehold.it/350x150/362000'
+]
 
 let opts = {
   'numberHigh': 3,
@@ -289,7 +336,7 @@ let opts2 = {
   'inverted': true
 }
 
-new InfiniteScroller(testItems, '.main', opts2);
-new InfiniteScroller(testItems, '.second', opts).changeInversion()
-new InfiniteScroller(testItems, '.third', opts).changeInversion()
-new InfiniteScroller(testItems, '.fourth', opts2).changeInversion()
+let a = new InfiniteScroller(testItems, '.main', opts2);
+let b = new InfiniteScroller(testItems2, '.second', opts)
+let c = new InfiniteScroller(testItems3, '.third', opts)
+let d = new InfiniteScroller(testItems4, '.fourth', opts2)
