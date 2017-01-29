@@ -68,6 +68,6 @@ module.exports = function(grunt){
   });
 
   grunt.registerTask('default', ['jshint','build'])
-  grunt.registerTask('dev', ['connect','watch'])
+  grunt.registerTask('dev', ['build', 'connect','watch'])
   grunt.registerTask('build', ['concat', 'babel', 'uglify', 'sass'])
 }
