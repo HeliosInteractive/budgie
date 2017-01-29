@@ -1,7 +1,9 @@
 'use strict';
 
 class InfiniteScroller {
+
   constructor(items, selector, options = {}) {
+
     this.selector = selector;
     this.options = Object.assign(this.constructor.defaultOptions(), options);
 
@@ -58,21 +60,24 @@ class InfiniteScroller {
     };
   }
 
-  static getElements(selector) {
-    let splitSelector = selector.split(/(\.|#)/,3)
-    splitSelector.shift()
-    switch(splitSelector[0]){
+  static getElement(selector) {
+
+    // allow dom elements to get passed in directly
+    if(typeof selector === 'object' )return selector;
+
+    let splitSelector = selector.substring(0, 1);
+    switch(splitSelector){
       case '.':
-        return document.getElementsByClassName(splitSelector[1])
+        return document.getElementsByClassName(selector.substring(1))[0];
       case '#':
-        return document.getElementById(splitSelector[1])
+        return document.getElementById(selector.substring(1));
       default:
         throw new Error("The selector must be a class or id, prepended by the identifier ('.'/'#')")
     }
   }
 
   setupContainer() {
-    let parentContainer = this.constructor.getElements(this.selector)[0];
+    let parentContainer = this.constructor.getElement(this.selector);
     parentContainer.className += ' infinite-flex-container-parent-' + this.position;
 
     let infiniteFlexContainer = document.createElement('div');
@@ -143,7 +148,7 @@ class InfiniteScroller {
     let elementsOnScreen = parseInt(this.options.numberHigh) * parseInt(this.options.numberWide)
 
     if(this.adjustedItems.length > elementsOnScreen){
-      let dupedElements = [].slice.call(self.constructor.getElements('.infinite-flex-item-' + self.position), 0, elementsOnScreen);
+      let dupedElements = [].slice.call(document.getElementsByClassName('infinite-flex-item-' + self.position), 0, elementsOnScreen);
 
       dupedElements.forEach(function(element){
         self.container.appendChild(element.cloneNode(true))
@@ -184,8 +189,8 @@ class InfiniteScroller {
 
   elementMeasurement(selector){
     let measure = {};
-    measure.height = parseFloat(window.getComputedStyle(this.constructor.getElements(selector)[0]).height);
-    measure.width = parseFloat(window.getComputedStyle(this.constructor.getElements(selector)[0]).width);
+    measure.height = parseFloat(window.getComputedStyle(this.constructor.getElement(selector)).height);
+    measure.width = parseFloat(window.getComputedStyle(this.constructor.getElement(selector)).width);
     return measure;
   }
 
