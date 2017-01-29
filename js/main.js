@@ -266,3 +266,6 @@ class InfiniteScroller {
     this.container.parentElement.removeChild(this.container)
   }
 }
+
+if( typeof global !== 'undefined')
+  global.InfiniteScroller = InfiniteScroller;
