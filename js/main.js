@@ -25,7 +25,7 @@ class InfiniteScroller {
     };
     this.items.shift = function(){
       let a = Array.prototype.shift.apply(self.items, arguments);
-      self.adjustElements();
+      self.shiftItem();
       return a;
     };
     this.items.unshift = function(){
@@ -77,7 +77,6 @@ class InfiniteScroller {
   }
 
   setupContainer() {
-
     let parentContainer = this.constructor.getElement(this.selector);
     parentContainer.classList.add(`infinite-flex-container-parent-${this.position}`);
 
@@ -228,9 +227,23 @@ class InfiniteScroller {
     this.start();
   }
 
+  shiftItem(){
+    this.items.forEach((item, index) => {
+      Array.from(document.getElementsByClassName(`infinite-${this.position}-${index}`)).forEach(element =>
+        element.style.backgroundImage = `url(${item})`);
+    });
+
+    let lastElement = document.getElementsByClassName(`infinite-${this.position}-${this.items.length}`)[0]
+    lastElement.parentNode.removeChild(lastElement);
+
+    this.updateListEnding('shift');
+
+    this.start();
+  }
+
   updateListEnding(method){
     let operator;
-    if(method === 'pop'){
+    if(method === 'pop' || method === 'shift'){
       operator = 1
     } else {
       // this covers 'push', 'unshift'
@@ -265,18 +278,18 @@ class InfiniteScroller {
 
   elementMeasurement(selector){
     let measure = {};
-    measure.height = parseFloat(window.getComputedStyle(this.constructor.getElement(selector)).height);
-    measure.width = parseFloat(window.getComputedStyle(this.constructor.getElement(selector)).width);
+    measure.height = parseFloat(window.getComputedStyle(document.getElementsByClassName(selector)[0]).height);
+    measure.width = parseFloat(window.getComputedStyle(document.getElementsByClassName(selector)[0]).width);
     return measure;
   }
 
   scrollSizeMeasurement(){
     switch(this.options.direction){
       case 'vertical':
-        return this.elementMeasurement(`.infinite-flex-item-${this.position}`).height * (Math.ceil(this.adjustedItems.length/this.options.numberWide));
+        return this.elementMeasurement(`infinite-flex-item-${this.position}`).height * (Math.ceil(this.adjustedItems.length/this.options.numberWide));
         break;
       case 'horizontal':
-        return this.elementMeasurement(`.infinite-flex-item-${this.position}`).width * (Math.ceil(this.adjustedItems.length/this.options.numberHigh));
+        return this.elementMeasurement(`infinite-flex-item-${this.position}`).width * (Math.ceil(this.adjustedItems.length/this.options.numberHigh));
         break;
     }
   }
@@ -302,7 +315,7 @@ class InfiniteScroller {
     else
       currentMargin = parseFloat(scrollContainer.style[marginSelector[this.options.direction]]);
 
-    let measure = this.elementMeasurement(`.infinite-container-${this.position}`);
+    let measure = this.elementMeasurement(`infinite-container-${this.position}`);
     let viewMeasure = (this.options.direction === "horizontal") ? measure.width : measure.height;
     let scrollSpeed = (viewMeasure / this.options.secondsOnPage / fps);
 
