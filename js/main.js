@@ -11,7 +11,6 @@ class InfiniteScroller {
     this.items = items;
     this.items.previousLength = items.length;
     this.adjustedItems = [];
-    this.elements = [];
 
     var self = this;
     this.items.pop = function(){
@@ -21,7 +20,7 @@ class InfiniteScroller {
     };
     this.items.push = function(){
       let a = Array.prototype.push.apply(self.items, arguments);
-      self.adjustElements();
+      self.pushItem();
       return a;
     };
     this.items.shift = function(){
@@ -146,8 +145,7 @@ class InfiniteScroller {
         this.container.appendChild(this.newFillerItem());
       }
 
-      this.elements.push(this.constructor.createItemAsImage(item, id, this.position));
-      this.container.appendChild(this.elements[this.elements.length - 1]);
+      this.container.appendChild(this.constructor.createItemAsImage(item, id, this.position));
 
       if(this.numberLeftWithOddEnding() > 0 && (this.items.length === id + 1)){
         this.container.appendChild(this.newFillerItem());
@@ -166,6 +164,7 @@ class InfiniteScroller {
 
   appendExtraItems(){
     let elementsOnScreen = this.elementsOnScreen();
+    this.createItemList();
 
     if(this.adjustedItems.length > elementsOnScreen)
       [].slice.call(document.getElementsByClassName(`infinite-flex-item-${this.position}`), 0, elementsOnScreen)
@@ -209,6 +208,17 @@ class InfiniteScroller {
     this.start();
   }
 
+  pushItem(){
+    // subtract 2 to account for using length not index, and also to get the last element before the push
+    let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - 2}`);
+    let newElement = this.constructor.createItemAsImage(this.items.slice(-1)[0], this.items.length - 1, this.position);
+    elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
+
+    this.updateListEnding('push');
+
+    this.start();
+  }
+
   popItem(){
     let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length}`);
     elements[0].parentNode.removeChild(elements[0]);
@@ -223,6 +233,7 @@ class InfiniteScroller {
     if(method === 'pop'){
       operator = 1
     } else {
+      // this covers 'push', 'unshift'
       operator = -1
     }
 
@@ -246,6 +257,10 @@ class InfiniteScroller {
     if(this.items.length <= this.elementsOnScreen())
       Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--duplicate`)).forEach(element =>
         element.parentNode.removeChild(element));
+
+    if(this.items.length > this.elementsOnScreen() && document.getElementsByClassName(`infinite-flex-item-${this.position}--duplicate`).length === 0){
+      this.appendExtraItems()
+    }
   }
 
   elementMeasurement(selector){
