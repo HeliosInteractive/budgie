@@ -213,6 +213,19 @@ class InfiniteScroller {
     let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length}`);
     elements[0].parentNode.removeChild(elements[0]);
 
+    this.updateListEnding('pop');
+
+    this.start();
+  }
+
+  updateListEnding(method){
+    let operator;
+    if(method === 'pop'){
+      operator = 1
+    } else {
+      operator = -1
+    }
+
     if(this.numberLeftWithOddEnding() > 0){
       if(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`).length === 0) {
         let lastElement = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - 1}`)[0];
@@ -221,7 +234,7 @@ class InfiniteScroller {
         lastElement.parentNode.insertBefore(this.newFillerItem(), lastElement.nextSibling);
       } else {
         Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`)).forEach((element) => {
-          element.classList.remove(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding() + 1}`);
+          element.classList.remove(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding() + operator}`);
           element.classList.add(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding()}`);
         });
       }
@@ -233,8 +246,6 @@ class InfiniteScroller {
     if(this.items.length <= this.elementsOnScreen())
       Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--duplicate`)).forEach(element =>
         element.parentNode.removeChild(element));
-
-    this.start();
   }
 
   elementMeasurement(selector){
