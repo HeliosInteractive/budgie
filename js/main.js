@@ -30,7 +30,7 @@ class InfiniteScroller {
     };
     this.items.unshift = function(){
       let a = Array.prototype.unshift.apply(self.items, arguments);
-      self.adjustElements();
+      self.unshiftItem();
       return a;
     };
     this.items.splice = function(){
@@ -208,37 +208,48 @@ class InfiniteScroller {
   }
 
   pushItem(){
-    // subtract 2 to account for using length not index, and also to get the last element before the push
-    let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - 2}`);
-    let newElement = this.constructor.createItemAsImage(this.items.slice(-1)[0], this.items.length - 1, this.position);
-    elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
-
+    this.addLastItem();
     this.updateListEnding('push');
-
     this.start();
   }
 
   popItem(){
-    let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length}`);
-    elements[0].parentNode.removeChild(elements[0]);
-
+    this.removeLastItem();
     this.updateListEnding('pop');
-
     this.start();
   }
 
   shiftItem(){
+    this.updateExistingItems()
+    this.removeLastItem();
+    this.updateListEnding('shift');
+    this.start();
+  }
+
+  unshiftItem(){
+    this.updateExistingItems()
+    this.addLastItem();
+    this.updateListEnding('unshift');
+    this.start();
+  }
+
+  removeLastItem(){
+    let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length}`);
+    elements[0].parentNode.removeChild(elements[0]);
+  }
+
+  addLastItem(){
+    // subtract 2 to account for using length not index, and also to get the last element before the push
+    let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - 2}`);
+    let newElement = this.constructor.createItemAsImage(this.items.slice(-1)[0], this.items.length - 1, this.position);
+    elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
+  }
+
+  updateExistingItems(){
     this.items.forEach((item, index) => {
       Array.from(document.getElementsByClassName(`infinite-${this.position}-${index}`)).forEach(element =>
         element.style.backgroundImage = `url(${item})`);
     });
-
-    let lastElement = document.getElementsByClassName(`infinite-${this.position}-${this.items.length}`)[0]
-    lastElement.parentNode.removeChild(lastElement);
-
-    this.updateListEnding('shift');
-
-    this.start();
   }
 
   updateListEnding(method){
