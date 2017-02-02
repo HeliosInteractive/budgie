@@ -16,7 +16,7 @@ class InfiniteScroller {
     var self = this;
     this.items.pop = function(){
       let a = Array.prototype.pop.apply(self.items, arguments);
-      self.adjustElements();
+      self.popItem();
       return a;
     };
     this.items.push = function(){
@@ -110,15 +110,20 @@ class InfiniteScroller {
   }
 
   setCSS(container){
-    let eleWidth = parseInt(window.getComputedStyle(container).width);
-    let numOfSheets = document.styleSheets[0].cssRules.length;
+    const eleWidth = parseInt(window.getComputedStyle(container).width);
+    const numOfSheets = document.styleSheets[0].cssRules.length;
+    const numberAcross = (this.options.direction === 'horizontal') ? this.options.numberHigh : this.options.numberWide;
 
     // Width in %
-    let width = ((eleWidth / this.options.numberWide / eleWidth) * 100);
-    let height = (100 / this.options.numberHigh);
+    const width = ((eleWidth / this.options.numberWide / eleWidth) * 100);
+    const height = (100 / this.options.numberHigh);
 
-    document.styleSheets[0].insertRule(`.infinite-flex-item-${this.position}{width: ${width}%; height: ${height}%;}`, numOfSheets);
+    document.styleSheets[0].insertRule(`.infinite-flex-item-${this.position}{width: ${width}%; height: ${height}%; flex-grow: 1;}`, numOfSheets);
     document.styleSheets[0].insertRule(`.infinite-flex-item-image-${this.position}{background-size: ${this.options.imageFit};}`, numOfSheets);
+
+    for(let i = numberAcross - 1; i >= 0; i--){
+      document.styleSheets[0].insertRule(`.infinite-flex-item-${this.position}--filler-${i}{width: ${width*(numberAcross - i)/2}%; height: ${height*(numberAcross - i)/2}%; flex-grow: 1;}`, numOfSheets);
+    }
 
     let direction = this.options.direction === 'horizontal' ? 'column' : 'row';
     document.styleSheets[0].insertRule(`.infinite-container-${this.position}{flex-direction: ${direction};}`, numOfSheets);
@@ -137,20 +142,42 @@ class InfiniteScroller {
 
   insertItems(){
     this.adjustedItems.forEach((item, id) => {
+      if(this.numberLeftWithOddEnding() > 0 && (this.items.length - this.numberLeftWithOddEnding() === id)){
+        this.container.appendChild(this.newFillerItem());
+      }
+
       this.elements.push(this.constructor.createItemAsImage(item, id, this.position));
       this.container.appendChild(this.elements[this.elements.length - 1]);
+
+      if(this.numberLeftWithOddEnding() > 0 && (this.items.length === id + 1)){
+        this.container.appendChild(this.newFillerItem());
+      }
+
     });
-    if(this.numberLeftWithOddEnding() > 0){
-      this.elements[this.elements.length - 1].classList.add(`infinite-flex-item--clear-${this.options.direction}`);
-    }
+  }
+
+
+  newFillerItem(){
+    let filler = document.createElement('div');
+    filler.classList.add(`infinite-flex-item-${this.position}--filler`);
+    filler.classList.add(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding()}`);
+    return filler;
   }
 
   appendExtraItems(){
-    let elementsOnScreen = parseInt(this.options.numberHigh) * parseInt(this.options.numberWide);
+    let elementsOnScreen = this.elementsOnScreen();
 
     if(this.adjustedItems.length > elementsOnScreen)
       [].slice.call(document.getElementsByClassName(`infinite-flex-item-${this.position}`), 0, elementsOnScreen)
-          .forEach(element => this.container.appendChild(element.cloneNode(true)));
+          .forEach((element) => {
+            let ele = element.cloneNode(true);
+            ele.classList.add(`infinite-flex-item-${this.position}--duplicate`);
+            this.container.appendChild(ele);
+          });
+  }
+
+  elementsOnScreen(){
+    return parseInt(this.options.numberHigh) * parseInt(this.options.numberWide);
   }
 
   adjustElements(){
@@ -178,6 +205,34 @@ class InfiniteScroller {
         }
       }
     }
+
+    this.start();
+  }
+
+  popItem(){
+    let elements = document.getElementsByClassName(`infinite-${this.position}-${this.items.length}`);
+    elements[0].parentNode.removeChild(elements[0]);
+
+    if(this.numberLeftWithOddEnding() > 0){
+      if(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`).length === 0) {
+        let lastElement = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - 1}`)[0];
+        let firstElement = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - this.numberLeftWithOddEnding()}`)[0];
+        firstElement.parentNode.insertBefore(this.newFillerItem(), firstElement);
+        lastElement.parentNode.insertBefore(this.newFillerItem(), lastElement.nextSibling);
+      } else {
+        Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`)).forEach((element) => {
+          element.classList.remove(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding() + 1}`);
+          element.classList.add(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding()}`);
+        });
+      }
+    } else {
+      Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`)).forEach(element =>
+        element.parentNode.removeChild(element));
+    }
+
+    if(this.items.length <= this.elementsOnScreen())
+      Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--duplicate`)).forEach(element =>
+        element.parentNode.removeChild(element));
 
     this.start();
   }
@@ -227,13 +282,17 @@ class InfiniteScroller {
 
     // always clear interval to ensure that only one scroller is running
     this.stop();
-    this.interval = setInterval(() => {
-      let marginChange = this.options.inverted ? (currentMargin += scrollSpeed) : (currentMargin -= scrollSpeed);
-      scrollContainer.style[marginSelector[this.options.direction]] = marginChange + 'px';
-      if((!this.options.inverted && currentMargin <= -scrollContainerSize) || (this.options.inverted && currentMargin >= 0))
-        currentMargin = this.options.inverted ? -scrollContainerSize : 0;
-      scrollContainer.style[marginSelector[this.options.direction]] = currentMargin + 'px';
-    }, 1000/fps);
+    if(this.items.length > this.elementsOnScreen()){
+      this.interval = setInterval(() => {
+        let marginChange = this.options.inverted ? (currentMargin += scrollSpeed) : (currentMargin -= scrollSpeed);
+        scrollContainer.style[marginSelector[this.options.direction]] = marginChange + 'px';
+        if((!this.options.inverted && currentMargin <= -scrollContainerSize) || (this.options.inverted && currentMargin >= 0))
+          currentMargin = this.options.inverted ? -scrollContainerSize : 0;
+        scrollContainer.style[marginSelector[this.options.direction]] = currentMargin + 'px';
+      }, 1000/fps);
+    } else {
+      scrollContainer.style[marginSelector[this.options.direction]] = this.options.inverted ? -scrollContainerSize : 0 + 'px';
+    }
   }
 
   //////////////

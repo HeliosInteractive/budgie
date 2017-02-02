@@ -10,6 +10,7 @@
   justify-content: center;
 }
 
+
 .infinite-flex-container--vertical{
   @extend .infinite-flex-container
 }
@@ -21,12 +22,15 @@
 .infinite-flex-item{
   flex-grow: 0;
 }
-.infinite-flex-item--clear-vertical{
-  margin-right: 0.1%;
-}
-.infinite-flex-item--clear-horizontal{
-  margin-bottom: 0.1%;
-}
+// .infinite-flex-item--filler{
+//   flex-grow: 10;
+// }
+// .infinite-flex-item--clear-vertical{
+//   margin-right: 0.1%;
+// }
+// .infinite-flex-item--clear-horizontal{
+//   margin-bottom: 0.1%;
+// }
 
 ////////////////////////////
 // for testing only
