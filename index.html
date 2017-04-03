@@ -4,7 +4,7 @@
 
   </head>
   <body>
-    <div class="main" style="overflow: scroll"></div>
+    <div class="main" style="overflow: hidden; overflow-y: scroll"></div>
     <div class="second"></div>
     <div class="third"></div>
     <div class="fourth"></div>
@@ -35,15 +35,12 @@
       ];
 
       let opts = {
-        'numberHigh': 5,
-        'numberWide': 3,
-        'clipOddEnding': true,
+        'numberHigh': 1,
+        'numberWide': 1,
         'secondsOnPage': 5.0,
-        'direction': 'horizontal',
-        'inverted': false
+        'direction': 'vertical',
+        'inverted': true
       };
-
-
 
       let a = new InfiniteScroller(testItems, '.main', opts);
     </script>
