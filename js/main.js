@@ -51,7 +51,7 @@ class InfiniteScroller {
       'secondsOnPage': 1.0,
       'stopOnHover': false,
       'inverted': false,
-      'scrollMode': true,
+      'autoScroll': true,
       'userNavigation': false,
       'imageFit': 'cover',
       'fps': 60
@@ -95,7 +95,11 @@ class InfiniteScroller {
     let scrollSize = this.scrollSizeMeasurement();
     let scrollDirection = this.scrollProperty();
 
-    this.parentContainer.addEventListener("scroll", function(){self.onScroll(scrollSize, scrollDirection)});
+    if(this.options.inverted && this.isNew) {
+      this.parentContainer[scrollDirection] = scrollSize;
+    }
+
+    this.parentContainer.addEventListener("scroll", function(){self.onScroll(scrollDirection)});
   }
 
   createItemList(){
@@ -139,9 +143,14 @@ class InfiniteScroller {
     document.styleSheets[0].insertRule(`.infinite-flex-container-parent-${this.position}::-webkit-scrollbar{display: none;}`, numOfSheets);
   }
 
-  static createItemAsImage(item, id, position){
+  static createElementForItem(item, id, position){
     let e = document.createElement('div');
-    e.style.backgroundImage = `url(${item})`;
+
+    if(typeof item === 'string') {
+      e.style.backgroundImage = `url(${item})`;
+    } else {
+      e.appendChild(item);
+    }
     e.classList.add(`infinite-flex-item-${position}`);
     e.classList.add(`infinite-flex-item-image-${position}`);
     e.classList.add(`infinite-${position}-${id}`);
@@ -154,7 +163,7 @@ class InfiniteScroller {
         this.container.appendChild(this.newFillerItem());
       }
 
-      this.container.appendChild(this.constructor.createItemAsImage(item, id, this.position));
+      this.container.appendChild(this.constructor.createElementForItem(item, id, this.position));
 
       if(this.numberLeftWithOddEnding() > 0 && (this.items.length === id + 1)){
         this.container.appendChild(this.newFillerItem());
@@ -246,7 +255,7 @@ class InfiniteScroller {
   addLastItem(itemIndex = this.items.length - 1, eleIndex = this.items.length - 2){
     // eleIndex; subtract 2 to account for using length not index, and also to get the last element before the push
     let elements = document.getElementsByClassName(`infinite-${this.position}-${eleIndex}`);
-    let newElement = this.constructor.createItemAsImage(this.items[itemIndex], itemIndex, this.position);
+    let newElement = this.constructor.createElementForItem(this.items[itemIndex], itemIndex, this.position);
     elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
   }
 
@@ -331,9 +340,8 @@ class InfiniteScroller {
     this.options.inverted = !this.options.inverted;
   }
 
-  onScroll(scrollSize, scrollDirection) {
-    console.log(this.parentContainer[scrollDirection], 'scrolling scrollin scrolling')
-    let scrollContainerSize = scrollSize;
+  onScroll(scrollDirection) {
+    let scrollContainerSize = this.scrollSizeMeasurement();
 
     if((this.parentContainer[scrollDirection] >= scrollContainerSize)) {
       this.parentContainer[scrollDirection] = 0;
@@ -356,17 +364,12 @@ class InfiniteScroller {
 
     let scrollDirection = this.scrollProperty();
 
-    let scrollContainerSize = this.scrollSizeMeasurement();
     let scrollContainer = this.container.parentElement;
     let currentScroll;
 
     let measure = this.elementMeasurement(`infinite-container-${this.position}`);
     let viewMeasure = (this.options.direction === "horizontal") ? measure.width : measure.height;
     let scrollSpeed = (viewMeasure / this.options.secondsOnPage / fps);
-
-    if(this.options.inverted && this.isNew) {
-      this.parentContainer[scrollDirection] = scrollContainerSize;
-    }
 
     // always clear interval to ensure that only one scroller is running
     this.stop();
@@ -397,7 +400,9 @@ class InfiniteScroller {
       this.appendExtraItems();
       this.bindScrollListener();
     }
-    this.startAnimation();
+    if(this.options.autoScroll){
+      this.startAnimation();
+    }
     this.isNew = false;
   }
 
