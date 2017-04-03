@@ -122,7 +122,11 @@ class InfiniteScroller {
 
   setCSS(container){
     const eleWidth = parseInt(window.getComputedStyle(container).width);
-    const numOfSheets = document.styleSheets[0].cssRules.length;
+    if(document.styleSheets[0].cssRules) {
+      const numOfSheets = document.styleSheets[0].cssRules.length;
+    } else {
+      const numOfSheets = 0;
+    }
     const numberAcross = (this.options.direction === 'horizontal') ? this.options.numberHigh : this.options.numberWide;
 
     // Width in %
