@@ -1,8 +1,10 @@
 {
-  "name": "infinity",
+  "name": "@helios-interactive/infinity",
   "version": "1.0.0",
   "description": "An infinite scroller plugin.",
   "scripts": {
+    "build": "grunt build",
+    "start": "grunt dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Adam McFadden <adam.mcfadden@heliosinteractive.com>",
