@@ -1,6 +1,6 @@
 {
   "name": "@helios-interactive/infinity",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "An infinite scroller plugin.",
   "scripts": {
     "build": "grunt build",
