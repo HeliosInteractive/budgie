@@ -13,6 +13,8 @@ npm install @helios-interactive/infinity --save
 #### Browser
 
 ```
+<link rel="stylesheet" href="node_modules/@helios-interactive/infinity/dist/main.css">
+
 <script src="node_modules/@helios-interactive/infinity/dist/infinity.min.js" type="text/javascript"></script>
 <script>
     new InfiniteScroller(items, '.element', options)
