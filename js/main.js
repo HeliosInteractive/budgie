@@ -78,6 +78,7 @@ class InfiniteScroller {
   setupContainer() {
     let parentContainer = this.constructor.getElement(this.selector);
     parentContainer.classList.add(`infinite-flex-container-parent-${this.position}`);
+    this.parentContainer = parentContainer;
 
     let infiniteFlexContainer = document.createElement('div');
     infiniteFlexContainer.classList.add('infinite-flex-container');
@@ -86,6 +87,12 @@ class InfiniteScroller {
     this.setCSS(infiniteFlexContainer);
 
     this.container = infiniteFlexContainer;
+  }
+
+  bindScrollListener() {
+    let self = this;
+    let scrollSize = this.scrollSizeMeasurement()
+    this.parentContainer.addEventListener("scroll", function(){self.onScroll(scrollSize)});
   }
 
   createItemList(){
@@ -320,6 +327,18 @@ class InfiniteScroller {
     this.options.inverted = !this.options.inverted;
   }
 
+  onScroll(scrollSize) {
+    console.log(this.parentContainer.scrollLeft, 'scrolling scrollin scrolling')
+    let scrollContainerSize = scrollSize;
+
+    if((this.parentContainer.scrollLeft >= scrollContainerSize)) {
+      this.parentContainer.scrollLeft = this.options.inverted ? -scrollContainerSize : 0;
+    }
+
+  }
+
+
+
   startAnimation() {
 
     const fps = 60;
@@ -345,11 +364,14 @@ class InfiniteScroller {
     this.stop();
     if(this.items.length > this.elementsOnScreen()){
       this.interval = setInterval(() => {
+        currentMargin = -scrollContainer.parentElement.scrollLeft
+        console.log(currentMargin)
         let marginChange = this.options.inverted ? (currentMargin += scrollSpeed) : (currentMargin -= scrollSpeed);
-        scrollContainer.style[marginSelector[this.options.direction]] = marginChange + 'px';
-        if((!this.options.inverted && currentMargin <= -scrollContainerSize) || (this.options.inverted && currentMargin >= 0))
-          currentMargin = this.options.inverted ? -scrollContainerSize : 0;
-        scrollContainer.style[marginSelector[this.options.direction]] = currentMargin + 'px';
+        // scrollContainer.style[marginSelector[this.options.direction]] = marginChange + 'px';
+        // if((!this.options.inverted && currentMargin <= -scrollContainerSize) || (this.options.inverted && currentMargin >= 0))
+        //   currentMargin = this.options.inverted ? -scrollContainerSize : 0;
+        // scrollContainer.style[marginSelector[this.options.direction]] = currentMargin + 'px';
+        scrollContainer.parentElement.scrollLeft = currentMargin*(-1)
       }, 1000/fps);
     } else {
       scrollContainer.style[marginSelector[this.options.direction]] = this.options.inverted ? -scrollContainerSize : 0 + 'px';
@@ -367,6 +389,7 @@ class InfiniteScroller {
       this.insertItems();
       this.appendExtraItems();
     }
+    this.bindScrollListener();
     this.startAnimation();
     this.isNew = false;
   }
