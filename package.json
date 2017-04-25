@@ -1,7 +1,7 @@
 {
-  "name": "@helios-interactive/infinity",
+  "name": "@helios-interactive/thrush",
   "version": "1.0.3",
-  "description": "An infinite scroller plugin.",
+  "description": "A plugin to handle all your scrolling needs.",
   "scripts": {
     "build": "grunt build",
     "start": "grunt dev",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HeliosInteractive/infinity"
+    "url": "https://github.com/HeliosInteractive/thrush"
   },
   "author": "Adam McFadden <adam.mcfadden@heliosinteractive.com>",
   "license": "MIT",

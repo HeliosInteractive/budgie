@@ -104,7 +104,11 @@ var InfiniteScroller = function () {
     key: 'setCSS',
     value: function setCSS(container) {
       var eleWidth = parseInt(window.getComputedStyle(container).width);
-      var numOfSheets = document.styleSheets[0].cssRules.length;
+      if (document.styleSheets[0].cssRules) {
+        var _numOfSheets = document.styleSheets[0].cssRules.length;
+      } else {
+        var _numOfSheets2 = 0;
+      }
       var numberAcross = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
 
       // Width in %
@@ -487,4 +491,4 @@ var InfiniteScroller = function () {
 }();
 
 if (typeof global !== 'undefined') global.InfiniteScroller = InfiniteScroller;
-//# sourceMappingURL=infinity.js.map
+//# sourceMappingURL=thrush.js.map
