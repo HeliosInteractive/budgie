@@ -223,6 +223,7 @@ class Budgie {
           realElements.length - this.numberLeftWithOddEnding(),
           realElements.length
         )
+          .reverse()
           .forEach((element) => {
             let ele = element.cloneNode(true);
             ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
@@ -240,6 +241,7 @@ class Budgie {
           realElements.length - elementsToDupe,
           realElements.length
         )
+          .reverse()
           .forEach((element) => {
             let ele = element.cloneNode(true);
             ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
@@ -430,7 +432,6 @@ class Budgie {
    * Controls the scrolling animation when budgie is set to autoscroll
    */
   startAnimation() {
-
     const fps =  this.options.fps;
 
     let scrollDirection = this.scrollProperty();
@@ -440,11 +441,13 @@ class Budgie {
 
     let measure = this.elementMeasurement(`budgie-container-${this.budgieId}`);
     let viewMeasure = (this.options.direction === "horizontal") ? measure.width : measure.height;
-    let scrollSpeed = (viewMeasure / this.options.secondsOnPage / fps);
+    // This needs to be a whole number, so always round up
+    let scrollSpeed = Math.ceil(viewMeasure / this.options.secondsOnPage / fps);
 
     // always clear interval to ensure that only one scroller is running
     this.stop();
     if(this.items.length > this.elementsOnScreen()){
+
       this.interval = setInterval(() => {
         let scrollDirection = this.scrollProperty()
 

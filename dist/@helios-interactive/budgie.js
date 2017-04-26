@@ -188,7 +188,7 @@ var Budgie = function () {
           this.container.insertAdjacentElement('afterbegin', this.newFillerItem());
 
           // Add the duplicated elements
-          realElements.slice(realElements.length - this.numberLeftWithOddEnding(), realElements.length).forEach(function (element) {
+          realElements.slice(realElements.length - this.numberLeftWithOddEnding(), realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
             ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
             _this2.container.insertAdjacentElement('afterbegin', ele);
@@ -201,7 +201,7 @@ var Budgie = function () {
           var elementsToDupe = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
 
           // Add the duplicated elements
-          realElements.slice(realElements.length - elementsToDupe, realElements.length).forEach(function (element) {
+          realElements.slice(realElements.length - elementsToDupe, realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
             ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
             _this2.container.insertAdjacentElement('afterbegin', ele);
@@ -432,6 +432,7 @@ var Budgie = function () {
     value: function startAnimation() {
       var _this5 = this;
 
+      console.log('starting');
       var fps = this.options.fps;
 
       var scrollDirection = this.scrollProperty();
@@ -441,17 +442,21 @@ var Budgie = function () {
 
       var measure = this.elementMeasurement('budgie-container-' + this.budgieId);
       var viewMeasure = this.options.direction === "horizontal" ? measure.width : measure.height;
-      var scrollSpeed = viewMeasure / this.options.secondsOnPage / fps;
+      // This needs to be a whole number, so always round up
+      var scrollSpeed = Math.ceil(viewMeasure / this.options.secondsOnPage / fps);
 
       // always clear interval to ensure that only one scroller is running
       this.stop();
       if (this.items.length > this.elementsOnScreen()) {
+        console.log('enough items');
+
         this.interval = setInterval(function () {
           var scrollDirection = _this5.scrollProperty();
 
           currentScroll = scrollContainer[scrollDirection];
 
           _this5.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
+          console.log('inside loop: ', scrollDirection, currentScroll, scrollSpeed);
 
           scrollContainer[scrollDirection] = currentScroll;
         }, 1000 / fps);
@@ -475,6 +480,7 @@ var Budgie = function () {
         this.setupScrollProperties();
       }
       if (this.options.autoScroll) {
+        console.log('its autoscroll');
         this.startAnimation();
       }
       this.isNew = false;

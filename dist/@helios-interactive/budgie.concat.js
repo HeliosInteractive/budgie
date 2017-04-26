@@ -223,6 +223,7 @@ class Budgie {
           realElements.length - this.numberLeftWithOddEnding(),
           realElements.length
         )
+          .reverse()
           .forEach((element) => {
             let ele = element.cloneNode(true);
             ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
@@ -240,6 +241,7 @@ class Budgie {
           realElements.length - elementsToDupe,
           realElements.length
         )
+          .reverse()
           .forEach((element) => {
             let ele = element.cloneNode(true);
             ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
@@ -430,7 +432,7 @@ class Budgie {
    * Controls the scrolling animation when budgie is set to autoscroll
    */
   startAnimation() {
-
+console.log('starting')
     const fps =  this.options.fps;
 
     let scrollDirection = this.scrollProperty();
@@ -440,17 +442,21 @@ class Budgie {
 
     let measure = this.elementMeasurement(`budgie-container-${this.budgieId}`);
     let viewMeasure = (this.options.direction === "horizontal") ? measure.width : measure.height;
-    let scrollSpeed = (viewMeasure / this.options.secondsOnPage / fps);
+    // This needs to be a whole number, so always round up
+    let scrollSpeed = Math.ceil(viewMeasure / this.options.secondsOnPage / fps);
 
     // always clear interval to ensure that only one scroller is running
     this.stop();
     if(this.items.length > this.elementsOnScreen()){
+      console.log('enough items')
+
       this.interval = setInterval(() => {
         let scrollDirection = this.scrollProperty()
 
         currentScroll = scrollContainer[scrollDirection];
 
         this.options.inverted ? (currentScroll += scrollSpeed) : (currentScroll -= scrollSpeed);
+        console.log('inside loop: ', scrollDirection, currentScroll, scrollSpeed)
 
         scrollContainer[scrollDirection] = currentScroll;
       }, 1000/fps);
@@ -471,6 +477,7 @@ class Budgie {
       this.setupScrollProperties();
     }
     if(this.options.autoScroll){
+      console.log('its autoscroll')
       this.startAnimation();
     }
     this.isNew = false;
