@@ -1,5 +1,5 @@
 //Container
-.infinite-flex-container{
+.budgie-flex-container{
   width: 100%;
   height: 100%;
   padding: 0;
@@ -10,24 +10,24 @@
   justify-content: center;
 }
 
-.infinite-flex-container--vertical{
-  @extend .infinite-flex-container
+.budgie-flex-container--vertical{
+  @extend .budgie-flex-container
 }
-.infinite-flex-container--horizontal{
-  @extend .infinite-flex-container
+.budgie-flex-container--horizontal{
+  @extend .budgie-flex-container
 }
 
 //Items
-.infinite-flex-item{
+.budgie-flex-item{
   flex-grow: 0;
 }
-// .infinite-flex-item--filler{
+// .budgie-flex-item--filler{
 //   flex-grow: 10;
 // }
-// .infinite-flex-item--clear-vertical{
+// .budgie-flex-item--clear-vertical{
 //   margin-right: 0.1%;
 // }
-// .infinite-flex-item--clear-horizontal{
+// .budgie-flex-item--clear-horizontal{
 //   margin-bottom: 0.1%;
 // }
 

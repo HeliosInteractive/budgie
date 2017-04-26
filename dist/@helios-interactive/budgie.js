@@ -6,11 +6,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var InfiniteScroller = function () {
-  function InfiniteScroller(items, selector) {
+var Budgie = function () {
+  function Budgie(items, selector) {
     var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-    _classCallCheck(this, InfiniteScroller);
+    _classCallCheck(this, Budgie);
 
     this.selector = selector;
     this.options = Object.assign(this.constructor.defaultOptions(), options);
@@ -50,20 +50,20 @@ var InfiniteScroller = function () {
     this.start();
   }
 
-  _createClass(InfiniteScroller, [{
+  _createClass(Budgie, [{
     key: 'setupContainer',
     value: function setupContainer() {
       var parentContainer = this.constructor.getElement(this.selector);
-      parentContainer.classList.add('infinite-flex-container-parent-' + this.position);
+      parentContainer.classList.add('budgie-flex-container-parent-' + this.position);
       this.parentContainer = parentContainer;
 
-      var infiniteFlexContainer = document.createElement('div');
-      infiniteFlexContainer.classList.add('infinite-flex-container');
-      infiniteFlexContainer.classList.add('infinite-container-' + this.position);
-      parentContainer.appendChild(infiniteFlexContainer);
-      this.setCSS(infiniteFlexContainer);
+      var budgieFlexContainer = document.createElement('div');
+      budgieFlexContainer.classList.add('budgie-flex-container');
+      budgieFlexContainer.classList.add('budgie-container-' + this.position);
+      parentContainer.appendChild(budgieFlexContainer);
+      this.setCSS(budgieFlexContainer);
 
-      this.container = infiniteFlexContainer;
+      this.container = budgieFlexContainer;
     }
   }, {
     key: 'bindScrollListener',
@@ -115,18 +115,18 @@ var InfiniteScroller = function () {
       var width = eleWidth / this.options.numberWide / eleWidth * 100;
       var height = 100 / this.options.numberHigh;
 
-      document.styleSheets[0].insertRule('.infinite-flex-item-' + this.position + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
-      document.styleSheets[0].insertRule('.infinite-flex-item-image-' + this.position + '{background-size: ' + this.options.imageFit + ';}', numOfSheets);
+      document.styleSheets[0].insertRule('.budgie-flex-item-' + this.position + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
+      document.styleSheets[0].insertRule('.budgie-flex-item-image-' + this.position + '{background-size: ' + this.options.imageFit + ';}', numOfSheets);
 
       for (var i = numberAcross - 1; i >= 0; i--) {
-        document.styleSheets[0].insertRule('.infinite-flex-item-' + this.position + '--filler-' + i + '{width: ' + width * (numberAcross - i) / 2 + '%; height: ' + height * (numberAcross - i) / 2 + '%; flex-grow: 1;}', numOfSheets);
+        document.styleSheets[0].insertRule('.budgie-flex-item-' + this.position + '--filler-' + i + '{width: ' + width * (numberAcross - i) / 2 + '%; height: ' + height * (numberAcross - i) / 2 + '%; flex-grow: 1;}', numOfSheets);
       }
 
       var direction = this.options.direction === 'horizontal' ? 'column' : 'row';
-      document.styleSheets[0].insertRule('.infinite-container-' + this.position + '{flex-direction: ' + direction + ';}', numOfSheets);
+      document.styleSheets[0].insertRule('.budgie-container-' + this.position + '{flex-direction: ' + direction + ';}', numOfSheets);
 
-      document.styleSheets[0].insertRule('.infinite-flex-container-parent-' + this.position + '{overflow-x: ' + (this.options.direction === 'horizontal' ? 'scroll' : 'hidden') + '; overflow-y: ' + (this.options.direction === 'vertical' ? 'scroll' : 'hidden') + '}', numOfSheets);
-      document.styleSheets[0].insertRule('.infinite-flex-container-parent-' + this.position + '::-webkit-scrollbar{display: none;}', numOfSheets);
+      document.styleSheets[0].insertRule('.budgie-flex-container-parent-' + this.position + '{overflow-x: ' + (this.options.direction === 'horizontal' ? 'scroll' : 'hidden') + '; overflow-y: ' + (this.options.direction === 'vertical' ? 'scroll' : 'hidden') + '}', numOfSheets);
+      document.styleSheets[0].insertRule('.budgie-flex-container-parent-' + this.position + '::-webkit-scrollbar{display: none;}', numOfSheets);
     }
   }, {
     key: 'insertItems',
@@ -147,7 +147,7 @@ var InfiniteScroller = function () {
       if (this.items.length < this.elementsOnScreen()) {
         // Append an extra div so that new items can be added
         var blankEle = document.createElement('div');
-        blankEle.classList.add('infinite-flex-item-' + this.position + '--blank');
+        blankEle.classList.add('budgie-flex-item-' + this.position + '--blank');
         this.container.appendChild(blankEle);
       }
     }
@@ -155,8 +155,8 @@ var InfiniteScroller = function () {
     key: 'newFillerItem',
     value: function newFillerItem() {
       var filler = document.createElement('div');
-      filler.classList.add('infinite-flex-item-' + this.position + '--filler');
-      filler.classList.add('infinite-flex-item-' + this.position + '--filler-' + this.numberLeftWithOddEnding());
+      filler.classList.add('budgie-flex-item-' + this.position + '--filler');
+      filler.classList.add('budgie-flex-item-' + this.position + '--filler-' + this.numberLeftWithOddEnding());
       return filler;
     }
   }, {
@@ -168,9 +168,9 @@ var InfiniteScroller = function () {
       this.createItemList();
 
       if (this.adjustedItems.length > elementsOnScreen) {
-        [].slice.call(document.getElementsByClassName('infinite-flex-item-' + this.position), 0, elementsOnScreen).forEach(function (element) {
+        [].slice.call(document.getElementsByClassName('budgie-flex-item-' + this.position), 0, elementsOnScreen).forEach(function (element) {
           var ele = element.cloneNode(true);
-          ele.classList.add('infinite-flex-item-' + _this2.position + '--duplicate');
+          ele.classList.add('budgie-flex-item-' + _this2.position + '--duplicate');
           _this2.container.appendChild(ele);
         });
       }
@@ -213,7 +213,7 @@ var InfiniteScroller = function () {
   }, {
     key: 'updateAllElements',
     value: function updateAllElements() {
-      var elementCount = document.querySelectorAll('.infinite-flex-item-' + this.position + ':not(.infinite-flex-item-' + this.position + '--duplicate)').length;
+      var elementCount = document.querySelectorAll('.budgie-flex-item-' + this.position + ':not(.budgie-flex-item-' + this.position + '--duplicate)').length;
       if (this.items.length > elementCount) {
         for (var i = elementCount; i < this.items.length; i++) {
           this.addLastItem(i, i - 1);
@@ -233,7 +233,7 @@ var InfiniteScroller = function () {
     value: function removeLastItem() {
       var eleIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.items.length;
 
-      var elements = document.getElementsByClassName('infinite-' + this.position + '-' + eleIndex);
+      var elements = document.getElementsByClassName('budgie-' + this.position + '-' + eleIndex);
       elements[0].parentNode.removeChild(elements[0]);
     }
   }, {
@@ -243,7 +243,7 @@ var InfiniteScroller = function () {
       var eleIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.items.length - 2;
 
       // eleIndex; subtract 2 to account for using length not index, and also to get the last element before the push
-      var elements = document.getElementsByClassName('infinite-' + this.position + '-' + eleIndex);
+      var elements = document.getElementsByClassName('budgie-' + this.position + '-' + eleIndex);
       var newElement = this.constructor.createElementForItem(this.items[itemIndex], itemIndex, this.position);
       elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
     }
@@ -253,7 +253,7 @@ var InfiniteScroller = function () {
       var _this3 = this;
 
       this.items.forEach(function (item, index) {
-        Array.from(document.getElementsByClassName('infinite-' + _this3.position + '-' + index)).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-' + _this3.position + '-' + index)).forEach(function (element) {
           return element.style.backgroundImage = 'url(' + item + ')';
         });
       });
@@ -275,45 +275,45 @@ var InfiniteScroller = function () {
         throw new Error("Only 'add' and 'remove' are supported arguments");
       }
 
-      if (redraw) Array.from(document.getElementsByClassName('infinite-flex-item-' + this.position + '--filler')).forEach(function (element) {
+      if (redraw) Array.from(document.getElementsByClassName('budgie-flex-item-' + this.position + '--filler')).forEach(function (element) {
         return element.parentNode.removeChild(element);
       });
 
       if (this.numberLeftWithOddEnding() > 0) {
-        if (document.getElementsByClassName('infinite-flex-item-' + this.position + '--filler').length === 0) {
-          var lastElement = document.getElementsByClassName('infinite-' + this.position + '-' + (this.items.length - 1))[0];
-          var firstElement = document.getElementsByClassName('infinite-' + this.position + '-' + (this.items.length - this.numberLeftWithOddEnding()))[0];
+        if (document.getElementsByClassName('budgie-flex-item-' + this.position + '--filler').length === 0) {
+          var lastElement = document.getElementsByClassName('budgie-' + this.position + '-' + (this.items.length - 1))[0];
+          var firstElement = document.getElementsByClassName('budgie-' + this.position + '-' + (this.items.length - this.numberLeftWithOddEnding()))[0];
           firstElement.parentNode.insertBefore(this.newFillerItem(), firstElement);
           lastElement.parentNode.insertBefore(this.newFillerItem(), lastElement.nextSibling);
         } else {
-          Array.from(document.getElementsByClassName('infinite-flex-item-' + this.position + '--filler')).forEach(function (element) {
-            element.classList.remove('infinite-flex-item-' + _this4.position + '--filler-' + (_this4.numberLeftWithOddEnding() + operator));
-            element.classList.add('infinite-flex-item-' + _this4.position + '--filler-' + _this4.numberLeftWithOddEnding());
+          Array.from(document.getElementsByClassName('budgie-flex-item-' + this.position + '--filler')).forEach(function (element) {
+            element.classList.remove('budgie-flex-item-' + _this4.position + '--filler-' + (_this4.numberLeftWithOddEnding() + operator));
+            element.classList.add('budgie-flex-item-' + _this4.position + '--filler-' + _this4.numberLeftWithOddEnding());
           });
         }
       } else {
-        Array.from(document.getElementsByClassName('infinite-flex-item-' + this.position + '--filler')).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.position + '--filler')).forEach(function (element) {
           return element.parentNode.removeChild(element);
         });
       }
 
       if (this.items.length <= this.elementsOnScreen()) {
-        Array.from(document.getElementsByClassName('infinite-flex-item-' + this.position + '--duplicate')).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.position + '--duplicate')).forEach(function (element) {
           return element.parentNode.removeChild(element);
         });
 
         // Append an extra div so that new items can be added
-        if (document.getElementsByClassName('infinite-flex-item-' + this.position + '--blank').length === 0) {
+        if (document.getElementsByClassName('budgie-flex-item-' + this.position + '--blank').length === 0) {
           var blankEle = document.createElement('div');
-          blankEle.classList.add('infinite-flex-item-' + this.position + '--blank');
+          blankEle.classList.add('budgie-flex-item-' + this.position + '--blank');
           this.container.appendChild(blankEle);
         }
       }
 
-      if (this.items.length > this.elementsOnScreen() && document.getElementsByClassName('infinite-flex-item-' + this.position + '--duplicate').length === 0) {
+      if (this.items.length > this.elementsOnScreen() && document.getElementsByClassName('budgie-flex-item-' + this.position + '--duplicate').length === 0) {
         this.appendExtraItems();
 
-        Array.from(document.getElementsByClassName('infinite-flex-item-' + this.position + '--blank')).forEach(function (blankEle) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.position + '--blank')).forEach(function (blankEle) {
           return blankEle.parentNode.removeChild(blankEle);
         });
       }
@@ -331,10 +331,10 @@ var InfiniteScroller = function () {
     value: function scrollSizeMeasurement() {
       switch (this.options.direction) {
         case 'vertical':
-          return this.elementMeasurement('infinite-flex-item-' + this.position).height * Math.ceil(this.adjustedItems.length / this.options.numberWide);
+          return this.elementMeasurement('budgie-flex-item-' + this.position).height * Math.ceil(this.adjustedItems.length / this.options.numberWide);
           break;
         case 'horizontal':
-          return this.elementMeasurement('infinite-flex-item-' + this.position).width * Math.ceil(this.adjustedItems.length / this.options.numberHigh);
+          return this.elementMeasurement('budgie-flex-item-' + this.position).width * Math.ceil(this.adjustedItems.length / this.options.numberHigh);
           break;
       }
     }
@@ -375,7 +375,7 @@ var InfiniteScroller = function () {
       var scrollContainer = this.container.parentElement;
       var currentScroll = void 0;
 
-      var measure = this.elementMeasurement('infinite-container-' + this.position);
+      var measure = this.elementMeasurement('budgie-container-' + this.position);
       var viewMeasure = this.options.direction === "horizontal" ? measure.width : measure.height;
       var scrollSpeed = viewMeasure / this.options.secondsOnPage / fps;
 
@@ -430,7 +430,7 @@ var InfiniteScroller = function () {
     key: 'remove',
     value: function remove() {
       this.stop();
-      this.container.parentElement.classList.remove('infinite-flex-container-parent-' + this.position);
+      this.container.parentElement.classList.remove('budgie-flex-container-parent-' + this.position);
       this.container.parentElement.removeChild(this.container);
     }
   }], [{
@@ -480,15 +480,15 @@ var InfiniteScroller = function () {
       } else {
         e.appendChild(item);
       }
-      e.classList.add('infinite-flex-item-' + position);
-      e.classList.add('infinite-flex-item-image-' + position);
-      e.classList.add('infinite-' + position + '-' + id);
+      e.classList.add('budgie-flex-item-' + position);
+      e.classList.add('budgie-flex-item-image-' + position);
+      e.classList.add('budgie-' + position + '-' + id);
       return e;
     }
   }]);
 
-  return InfiniteScroller;
+  return Budgie;
 }();
 
-if (typeof global !== 'undefined') global.InfiniteScroller = InfiniteScroller;
+if (typeof global !== 'undefined') global.Budgie = Budgie;
 //# sourceMappingURL=budgie.js.map

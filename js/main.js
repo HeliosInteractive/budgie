@@ -1,5 +1,5 @@
 'use strict';
-class InfiniteScroller {
+class Budgie {
 
   constructor(items, selector, options = {}) {
 
@@ -78,16 +78,16 @@ class InfiniteScroller {
 
   setupContainer() {
     let parentContainer = this.constructor.getElement(this.selector);
-    parentContainer.classList.add(`infinite-flex-container-parent-${this.position}`);
+    parentContainer.classList.add(`budgie-flex-container-parent-${this.position}`);
     this.parentContainer = parentContainer;
 
-    let infiniteFlexContainer = document.createElement('div');
-    infiniteFlexContainer.classList.add('infinite-flex-container');
-    infiniteFlexContainer.classList.add(`infinite-container-${this.position}`);
-    parentContainer.appendChild(infiniteFlexContainer);
-    this.setCSS(infiniteFlexContainer);
+    let budgieFlexContainer = document.createElement('div');
+    budgieFlexContainer.classList.add('budgie-flex-container');
+    budgieFlexContainer.classList.add(`budgie-container-${this.position}`);
+    parentContainer.appendChild(budgieFlexContainer);
+    this.setCSS(budgieFlexContainer);
 
-    this.container = infiniteFlexContainer;
+    this.container = budgieFlexContainer;
   }
 
   bindScrollListener() {
@@ -133,18 +133,18 @@ class InfiniteScroller {
     const width = ((eleWidth / this.options.numberWide / eleWidth) * 100);
     const height = (100 / this.options.numberHigh);
 
-    document.styleSheets[0].insertRule(`.infinite-flex-item-${this.position}{width: ${width}%; height: ${height}%;}`, numOfSheets);
-    document.styleSheets[0].insertRule(`.infinite-flex-item-image-${this.position}{background-size: ${this.options.imageFit};}`, numOfSheets);
+    document.styleSheets[0].insertRule(`.budgie-flex-item-${this.position}{width: ${width}%; height: ${height}%;}`, numOfSheets);
+    document.styleSheets[0].insertRule(`.budgie-flex-item-image-${this.position}{background-size: ${this.options.imageFit};}`, numOfSheets);
 
     for(let i = numberAcross - 1; i >= 0; i--){
-      document.styleSheets[0].insertRule(`.infinite-flex-item-${this.position}--filler-${i}{width: ${width*(numberAcross - i)/2}%; height: ${height*(numberAcross - i)/2}%; flex-grow: 1;}`, numOfSheets);
+      document.styleSheets[0].insertRule(`.budgie-flex-item-${this.position}--filler-${i}{width: ${width*(numberAcross - i)/2}%; height: ${height*(numberAcross - i)/2}%; flex-grow: 1;}`, numOfSheets);
     }
 
     let direction = this.options.direction === 'horizontal' ? 'column' : 'row';
-    document.styleSheets[0].insertRule(`.infinite-container-${this.position}{flex-direction: ${direction};}`, numOfSheets);
+    document.styleSheets[0].insertRule(`.budgie-container-${this.position}{flex-direction: ${direction};}`, numOfSheets);
 
-    document.styleSheets[0].insertRule(`.infinite-flex-container-parent-${this.position}{overflow-x: ${this.options.direction === 'horizontal' ? 'scroll' : 'hidden'}; overflow-y: ${this.options.direction === 'vertical' ? 'scroll' : 'hidden'}}`, numOfSheets);
-    document.styleSheets[0].insertRule(`.infinite-flex-container-parent-${this.position}::-webkit-scrollbar{display: none;}`, numOfSheets);
+    document.styleSheets[0].insertRule(`.budgie-flex-container-parent-${this.position}{overflow-x: ${this.options.direction === 'horizontal' ? 'scroll' : 'hidden'}; overflow-y: ${this.options.direction === 'vertical' ? 'scroll' : 'hidden'}}`, numOfSheets);
+    document.styleSheets[0].insertRule(`.budgie-flex-container-parent-${this.position}::-webkit-scrollbar{display: none;}`, numOfSheets);
   }
 
   static createElementForItem(item, id, position){
@@ -155,9 +155,9 @@ class InfiniteScroller {
     } else {
       e.appendChild(item);
     }
-    e.classList.add(`infinite-flex-item-${position}`);
-    e.classList.add(`infinite-flex-item-image-${position}`);
-    e.classList.add(`infinite-${position}-${id}`);
+    e.classList.add(`budgie-flex-item-${position}`);
+    e.classList.add(`budgie-flex-item-image-${position}`);
+    e.classList.add(`budgie-${position}-${id}`);
     return e;
   }
 
@@ -176,7 +176,7 @@ class InfiniteScroller {
     if(this.items.length < this.elementsOnScreen()){
       // Append an extra div so that new items can be added
       let blankEle = document.createElement('div');
-      blankEle.classList.add(`infinite-flex-item-${this.position}--blank`);
+      blankEle.classList.add(`budgie-flex-item-${this.position}--blank`);
       this.container.appendChild(blankEle);
     }
   }
@@ -184,8 +184,8 @@ class InfiniteScroller {
 
   newFillerItem(){
     let filler = document.createElement('div');
-    filler.classList.add(`infinite-flex-item-${this.position}--filler`);
-    filler.classList.add(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding()}`);
+    filler.classList.add(`budgie-flex-item-${this.position}--filler`);
+    filler.classList.add(`budgie-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding()}`);
     return filler;
   }
 
@@ -194,10 +194,10 @@ class InfiniteScroller {
     this.createItemList();
 
     if(this.adjustedItems.length > elementsOnScreen){
-      [].slice.call(document.getElementsByClassName(`infinite-flex-item-${this.position}`), 0, elementsOnScreen)
+      [].slice.call(document.getElementsByClassName(`budgie-flex-item-${this.position}`), 0, elementsOnScreen)
           .forEach((element) => {
             let ele = element.cloneNode(true);
-            ele.classList.add(`infinite-flex-item-${this.position}--duplicate`);
+            ele.classList.add(`budgie-flex-item-${this.position}--duplicate`);
             this.container.appendChild(ele);
           });
     }
@@ -235,7 +235,7 @@ class InfiniteScroller {
   }
 
   updateAllElements(){
-    let elementCount = document.querySelectorAll(`.infinite-flex-item-${this.position}:not(.infinite-flex-item-${this.position}--duplicate)`).length
+    let elementCount = document.querySelectorAll(`.budgie-flex-item-${this.position}:not(.budgie-flex-item-${this.position}--duplicate)`).length
     if(this.items.length > elementCount){
       for(let i = elementCount; i < this.items.length; i++){
         this.addLastItem(i, i - 1);
@@ -252,20 +252,20 @@ class InfiniteScroller {
   }
 
   removeLastItem(eleIndex = this.items.length){
-    let elements = document.getElementsByClassName(`infinite-${this.position}-${eleIndex}`);
+    let elements = document.getElementsByClassName(`budgie-${this.position}-${eleIndex}`);
     elements[0].parentNode.removeChild(elements[0]);
   }
 
   addLastItem(itemIndex = this.items.length - 1, eleIndex = this.items.length - 2){
     // eleIndex; subtract 2 to account for using length not index, and also to get the last element before the push
-    let elements = document.getElementsByClassName(`infinite-${this.position}-${eleIndex}`);
+    let elements = document.getElementsByClassName(`budgie-${this.position}-${eleIndex}`);
     let newElement = this.constructor.createElementForItem(this.items[itemIndex], itemIndex, this.position);
     elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
   }
 
   updateExistingItems(){
     this.items.forEach((item, index) => {
-      Array.from(document.getElementsByClassName(`infinite-${this.position}-${index}`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-${this.position}-${index}`)).forEach(element =>
         element.style.backgroundImage = `url(${item})`);
     });
   }
@@ -282,42 +282,42 @@ class InfiniteScroller {
     }
 
     if(redraw)
-      Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.position}--filler`)).forEach(element =>
         element.parentNode.removeChild(element));
 
     if(this.numberLeftWithOddEnding() > 0){
-      if(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`).length === 0) {
-        let lastElement = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - 1}`)[0];
-        let firstElement = document.getElementsByClassName(`infinite-${this.position}-${this.items.length - this.numberLeftWithOddEnding()}`)[0];
+      if(document.getElementsByClassName(`budgie-flex-item-${this.position}--filler`).length === 0) {
+        let lastElement = document.getElementsByClassName(`budgie-${this.position}-${this.items.length - 1}`)[0];
+        let firstElement = document.getElementsByClassName(`budgie-${this.position}-${this.items.length - this.numberLeftWithOddEnding()}`)[0];
         firstElement.parentNode.insertBefore(this.newFillerItem(), firstElement);
         lastElement.parentNode.insertBefore(this.newFillerItem(), lastElement.nextSibling);
       } else {
-        Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`)).forEach((element) => {
-          element.classList.remove(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding() + operator}`);
-          element.classList.add(`infinite-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding()}`);
+        Array.from(document.getElementsByClassName(`budgie-flex-item-${this.position}--filler`)).forEach((element) => {
+          element.classList.remove(`budgie-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding() + operator}`);
+          element.classList.add(`budgie-flex-item-${this.position}--filler-${this.numberLeftWithOddEnding()}`);
         });
       }
     } else {
-      Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--filler`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.position}--filler`)).forEach(element =>
         element.parentNode.removeChild(element));
     }
 
     if(this.items.length <= this.elementsOnScreen()) {
-      Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--duplicate`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.position}--duplicate`)).forEach(element =>
         element.parentNode.removeChild(element));
 
       // Append an extra div so that new items can be added
-      if(document.getElementsByClassName(`infinite-flex-item-${this.position}--blank`).length === 0){
+      if(document.getElementsByClassName(`budgie-flex-item-${this.position}--blank`).length === 0){
         let blankEle = document.createElement('div');
-        blankEle.classList.add(`infinite-flex-item-${this.position}--blank`);
+        blankEle.classList.add(`budgie-flex-item-${this.position}--blank`);
         this.container.appendChild(blankEle);
       }
     }
 
-    if(this.items.length > this.elementsOnScreen() && document.getElementsByClassName(`infinite-flex-item-${this.position}--duplicate`).length === 0){
+    if(this.items.length > this.elementsOnScreen() && document.getElementsByClassName(`budgie-flex-item-${this.position}--duplicate`).length === 0){
       this.appendExtraItems();
 
-      Array.from(document.getElementsByClassName(`infinite-flex-item-${this.position}--blank`)).forEach(blankEle =>
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.position}--blank`)).forEach(blankEle =>
         blankEle.parentNode.removeChild(blankEle));
     }
   }
@@ -332,10 +332,10 @@ class InfiniteScroller {
   scrollSizeMeasurement(){
     switch(this.options.direction){
       case 'vertical':
-        return this.elementMeasurement(`infinite-flex-item-${this.position}`).height * (Math.ceil(this.adjustedItems.length/this.options.numberWide));
+        return this.elementMeasurement(`budgie-flex-item-${this.position}`).height * (Math.ceil(this.adjustedItems.length/this.options.numberWide));
         break;
       case 'horizontal':
-        return this.elementMeasurement(`infinite-flex-item-${this.position}`).width * (Math.ceil(this.adjustedItems.length/this.options.numberHigh));
+        return this.elementMeasurement(`budgie-flex-item-${this.position}`).width * (Math.ceil(this.adjustedItems.length/this.options.numberHigh));
         break;
     }
   }
@@ -371,7 +371,7 @@ class InfiniteScroller {
     let scrollContainer = this.container.parentElement;
     let currentScroll;
 
-    let measure = this.elementMeasurement(`infinite-container-${this.position}`);
+    let measure = this.elementMeasurement(`budgie-container-${this.position}`);
     let viewMeasure = (this.options.direction === "horizontal") ? measure.width : measure.height;
     let scrollSpeed = (viewMeasure / this.options.secondsOnPage / fps);
 
@@ -419,10 +419,10 @@ class InfiniteScroller {
 
   remove() {
     this.stop();
-    this.container.parentElement.classList.remove(`infinite-flex-container-parent-${this.position}`);
+    this.container.parentElement.classList.remove(`budgie-flex-container-parent-${this.position}`);
     this.container.parentElement.removeChild(this.container);
   }
 }
 
 if( typeof global !== 'undefined')
-  global.InfiniteScroller = InfiniteScroller;
+  global.Budgie = Budgie;
