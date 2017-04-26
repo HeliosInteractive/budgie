@@ -114,11 +114,17 @@ body {
 
 .code-block {
   width: 100%;
-  white-space: pre-line;
+  white-space: pre;
   color: black;
   background-color: var(--medium-grey);
   font-family: 'PT Mono', monospace;
   font-size: 0.8em;
   border: 1px dashed;
   padding: 0.5em;
+  margin: 0.5em 0;
+}
+
+.example-box {
+  height: 25vh;
+  width: 100%;
 }

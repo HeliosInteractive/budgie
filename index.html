@@ -4,7 +4,7 @@
 
   </head>
   <body>
-    <div class="main" style="overflow: hidden; overflow-y: scroll"></div>
+    <div class="main"></div>
     <script src="dist/@helios-interactive/budgie.js" type="text/javascript"></script>
 
     <script>
@@ -43,25 +43,15 @@
         'http://placehold.it/350x150/770034',
         'http://placehold.it/350x150/880000',
         'http://placehold.it/350x150/3300ff',
-        'http://placehold.it/350x150/2200ee',
-        'http://placehold.it/350x150/1100bb',
-        'http://placehold.it/350x150/660000',
-        'http://placehold.it/350x150/770034',
-        'http://placehold.it/350x150/880000',
-        'http://placehold.it/350x150/119c0c',
-        'http://placehold.it/350x150/0f0011',
-        'http://placehold.it/350x150/800320',
-        'http://placehold.it/350x150/0670f1',
-        'http://placehold.it/350x150/362000'
       ];
 
       let opts = {
-        'numberHigh': 1,
-        'numberWide': 1,
+        'numberHigh': 2,
+        'numberWide': 3,
         'secondsOnPage': 5.0,
         'direction': 'vertical',
         'inverted': true,
-        'autoScroll': false
+        'autoScroll': true
       };
 
       let a = new InfiniteScroller(testItems, '.main', opts);

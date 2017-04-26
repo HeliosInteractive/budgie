@@ -12,39 +12,101 @@
         <p>A plugin to handle all your scrolling needs.</p>
       </div>
 
+
       <div class="examples-container">
         <div class="example-container">
           <div class="example-title">
-            Title 1
+            Horizontal scroll, with autoScroll on.
           </div>
           <div class="left-column">
             <div class="column-item-content">
-              Example of the scroller here
+              <div id="example-1" class="example-box"></div>
             </div>
           </div>
           <div class="right-column">
             <div class="column-item-content">
-              More explanations here
+<div class="code-block">
+  var exampleOne = new InfiniteScroller(
+    sampleImages,
+    '#example-1',
+    {
+      'numberHigh': 1,
+      'numberWide': 4,
+      'secondsOnPage': 15.0,
+      'direction': 'horizontal',
+      'autoScroll': true
+    }
+  );
+</div>
+
             </div>
 
             <div class="right-column-backpaper--1"></div>
             <div class="right-column-backpaper--2"></div>
           </div>
         </div>
+
+
+      <div class="examples-container">
         <div class="example-container">
+          <div class="example-title">
+            Inverted Horizontal scroll, with autoScroll on.
+          </div>
           <div class="left-column">
             <div class="column-item-content">
-              Example of the scroller here
+              <div id="example-2" class="example-box"></div>
             </div>
           </div>
           <div class="right-column">
             <div class="column-item-content">
-              <div class="code-block">
-                foote
-                aside
+<div class="code-block">
+  var exampleTwo = new InfiniteScroller(
+    sampleImages,
+    '#example-2',
+    {
+      'numberHigh': 1,
+      'numberWide': 4,
+      'secondsOnPage': 15.0,
+      'direction': 'horizontal',
+      'inverted': true,
+      'autoScroll': true
+    }
+  );
+</div>
 
-              </div>
-              More explanations here
+            </div>
+
+            <div class="right-column-backpaper--1"></div>
+            <div class="right-column-backpaper--2"></div>
+          </div>
+        </div>
+
+
+        <div class="example-container">
+          <div class="example-title">
+            Inverted vertical scroll, with autoScroll on.
+          </div>
+          <div class="left-column">
+            <div class="column-item-content">
+              <div id="example-3" class="example-box"></div>
+            </div>
+          </div>
+          <div class="right-column">
+            <div class="column-item-content">
+<div class="code-block">
+  var exampleThree = new InfiniteScroller(
+    sampleImages,
+    '#example-3',
+    {
+      'numberHigh': 2,
+      'numberWide': 3,
+      'secondsOnPage': 15.0,
+      'direction': 'vertical',
+      'inverted': true,
+      'autoScroll': true
+    }
+  );
+</div>
             </div>
 
             <div class="right-column-backpaper--1"></div>
@@ -54,7 +116,59 @@
       </div>
     </div>
 
+    <script src="../dist/@helios-interactive/budgie.js" type="text/javascript"></script>
+
     <script>
+      var sampleImages = [
+        'http://placehold.it/350x150/660090/660090',
+        'http://placehold.it/350x150/400090/400090',
+        'http://placehold.it/350x150/550099/550099',
+        'http://placehold.it/350x150/3300ff/3300ff',
+        'http://placehold.it/350x150/2200ee/2200ee',
+        'http://placehold.it/350x150/1100bb/1100bb',
+        'http://placehold.it/350x150/660000/660000',
+        'http://placehold.it/350x150/770034/770034',
+        'http://placehold.it/350x150/880000/880000',
+        'http://placehold.it/350x150/3300ff/3300ff',
+      ];
+
+      var exampleOne = new InfiniteScroller(
+        sampleImages,
+        '#example-1',
+        {
+          'numberHigh': 2,
+          'numberWide': 4,
+          'secondsOnPage': 15.0,
+          'direction': 'horizontal',
+          'autoScroll': true
+        }
+      );
+
+      var exampleTwo = new InfiniteScroller(
+        sampleImages,
+        '#example-2',
+        {
+          'numberHigh': 1,
+          'numberWide': 3,
+          'secondsOnPage': 15.0,
+          'direction': 'horizontal',
+          'inverted': true,
+          'autoScroll': true
+        }
+      );
+
+      var exampleThree = new InfiniteScroller(
+        sampleImages,
+        '#example-3',
+        {
+          'numberHigh': 2,
+          'numberWide': 3,
+          'secondsOnPage': 15.0,
+          'direction': 'vertical',
+          'inverted': true,
+          'autoScroll': true
+        }
+      );
 
     </script>
 
