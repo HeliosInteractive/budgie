@@ -1,11 +1,11 @@
-# Infinity
+# Budgie
 
 An infinite scrolling plugin, that can adapt as the list of items it is scrolling changes.
 
 ## Instalation
 
 ```$xslt
-npm install @helios-interactive/infinity --save
+npm install @helios-interactive/budgie --save
 ```
 
 ## Usage
@@ -13,9 +13,9 @@ npm install @helios-interactive/infinity --save
 #### Browser
 
 ```
-<link rel="stylesheet" href="node_modules/@helios-interactive/infinity/dist/main.css">
+<link rel="stylesheet" href="node_modules/@helios-interactive/budgie/dist/main.css">
 
-<script src="node_modules/@helios-interactive/infinity/dist/infinity.min.js" type="text/javascript"></script>
+<script src="node_modules/@helios-interactive/budgie/dist/budgie.min.js" type="text/javascript"></script>
 <script>
     new InfiniteScroller(items, '.element', options)
 </script>
@@ -47,7 +47,7 @@ npm install @helios-interactive/infinity --save
 > The items array can be accessed via the items property on the scroller. See example:
 >```
 > var scroller = new InfiniteScroller(items, '.element', options)
-> scroller.items 
+> scroller.items
 > // [item1, item2]
 >```
 >

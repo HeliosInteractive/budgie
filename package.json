@@ -1,5 +1,5 @@
 {
-  "name": "@helios-interactive/thrush",
+  "name": "@helios-interactive/budgie",
   "version": "1.0.3",
   "description": "A plugin to handle all your scrolling needs.",
   "scripts": {
@@ -9,9 +9,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HeliosInteractive/thrush"
+    "url": "https://github.com/HeliosInteractive/budgie"
   },
-  "author": "Adam McFadden <adam.mcfadden@heliosinteractive.com>",
+  "author": "Adam McFadden <mcfadden.113@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "babel-preset-es2015": "^6.22.0",
