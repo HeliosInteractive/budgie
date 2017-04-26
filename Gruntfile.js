@@ -32,7 +32,8 @@ module.exports = function(grunt){
       },
       dist: {
         files: {
-          'dist/<%= pkg.name %>.min.js': ['dist/<%= pkg.name %>.js']
+          'dist/<%= pkg.name %>.min.js': ['dist/<%= pkg.name %>.js'],
+          'docs/budgie.min.js': ['dist/<%= pkg.name %>.js']
         }
       }
     },
@@ -43,7 +44,7 @@ module.exports = function(grunt){
       },
       dist: {
         files: {
-          'dist/<%= pkg.name %>.js': '<%= concat.dist.dest %>'
+          'dist/<%= pkg.name %>.js': '<%= concat.dist.dest %>',
         }
       }
     },
@@ -62,7 +63,8 @@ module.exports = function(grunt){
           style: 'expanded'
         },
         files: {
-          'dist/main.css':'styles/main.scss'
+          'dist/main.css':'styles/main.scss',
+          'docs/budgie.css':'styles/main.scss'
         }
       }
     }
