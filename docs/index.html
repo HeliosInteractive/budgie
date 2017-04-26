@@ -14,6 +14,8 @@
 
 
       <div class="examples-container">
+
+
         <div class="example-container">
           <div class="example-title">
             Horizontal scroll, with autoScroll on.
@@ -30,7 +32,7 @@
     sampleImages,
     '#example-1',
     {
-      'numberHigh': 1,
+      'numberHigh': 2,
       'numberWide': 4,
       'secondsOnPage': 15.0,
       'direction': 'horizontal',
@@ -38,16 +40,13 @@
     }
   );
 </div>
-
             </div>
-
             <div class="right-column-backpaper--1"></div>
             <div class="right-column-backpaper--2"></div>
           </div>
         </div>
 
 
-      <div class="examples-container">
         <div class="example-container">
           <div class="example-title">
             Inverted Horizontal scroll, with autoScroll on.
@@ -65,17 +64,45 @@
     '#example-2',
     {
       'numberHigh': 1,
-      'numberWide': 4,
+      'numberWide': 3,
       'secondsOnPage': 15.0,
       'direction': 'horizontal',
-      'inverted': true,
       'autoScroll': true
     }
   );
 </div>
-
             </div>
+            <div class="right-column-backpaper--1"></div>
+            <div class="right-column-backpaper--2"></div>
+          </div>
+        </div>
 
+
+        <div class="example-container">
+          <div class="example-title">
+            Vertical scroll, with autoScroll on.
+          </div>
+          <div class="left-column">
+            <div class="column-item-content">
+              <div id="example-3" class="example-box"></div>
+            </div>
+          </div>
+          <div class="right-column">
+            <div class="column-item-content">
+<div class="code-block">
+  var exampleThree = new Budgie(
+    sampleImages,
+    '#example-3',
+    {
+      'numberHigh': 2,
+      'numberWide': 3,
+      'secondsOnPage': 15.0,
+      'direction': 'vertical',
+      'autoScroll': true
+    }
+  );
+</div>
+            </div>
             <div class="right-column-backpaper--1"></div>
             <div class="right-column-backpaper--2"></div>
           </div>
@@ -88,18 +115,18 @@
           </div>
           <div class="left-column">
             <div class="column-item-content">
-              <div id="example-3" class="example-box"></div>
+              <div id="example-4" class="example-box"></div>
             </div>
           </div>
           <div class="right-column">
             <div class="column-item-content">
 <div class="code-block">
-  var exampleThree = new InfiniteScroller(
+  var exampleFour = new Budgie(
     sampleImages,
-    '#example-3',
+    '#example-4',
     {
       'numberHigh': 2,
-      'numberWide': 3,
+      'numberWide': 4,
       'secondsOnPage': 15.0,
       'direction': 'vertical',
       'inverted': true,
@@ -108,7 +135,6 @@
   );
 </div>
             </div>
-
             <div class="right-column-backpaper--1"></div>
             <div class="right-column-backpaper--2"></div>
           </div>
@@ -132,7 +158,7 @@
         'http://placehold.it/350x150/3300ff/3300ff',
       ];
 
-      var exampleOne = new InfiniteScroller(
+      var exampleOne = new Budgie(
         sampleImages,
         '#example-1',
         {
@@ -144,7 +170,7 @@
         }
       );
 
-      var exampleTwo = new InfiniteScroller(
+      var exampleTwo = new Budgie(
         sampleImages,
         '#example-2',
         {
@@ -157,12 +183,24 @@
         }
       );
 
-      var exampleThree = new InfiniteScroller(
+      var exampleThree = new Budgie(
         sampleImages,
         '#example-3',
         {
           'numberHigh': 2,
           'numberWide': 3,
+          'secondsOnPage': 15.0,
+          'direction': 'vertical',
+          'autoScroll': true
+        }
+      );
+
+      var exampleFour = new Budgie(
+        sampleImages,
+        '#example-4',
+        {
+          'numberHigh': 2,
+          'numberWide': 4,
           'secondsOnPage': 15.0,
           'direction': 'vertical',
           'inverted': true,
