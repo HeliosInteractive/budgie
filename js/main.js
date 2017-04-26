@@ -98,13 +98,16 @@ class Budgie {
     this.container = budgieFlexContainer;
   }
 
-  bindScrollListener() {
+  setupScrollProperties() {
     let self = this;
-    let scrollSize = this.scrollSizeMeasurement();
     let scrollDirection = this.scrollProperty();
 
-    if(this.options.inverted && this.isNew) {
-      this.parentContainer[scrollDirection] = scrollSize;
+    if(this.isNew) {
+      let budgieElement = this.elementMeasurement(`budgie-flex-item-${this.budgieId}`)
+      let budgieElementMeasure = this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height
+
+      // Set the scroll position to the top of the non-duped elements
+      this.parentContainer[scrollDirection] = budgieElementMeasure;
     }
 
     this.parentContainer.addEventListener("scroll", function(){self.onScroll(scrollDirection)});
@@ -401,9 +404,12 @@ class Budgie {
   onScroll(scrollDirection) {
     let scrollContainerSize = this.scrollSizeMeasurement();
 
-    console.log('On Scroll', this.parentContainer[scrollDirection], scrollContainerSize)
-    if((this.parentContainer[scrollDirection] >= scrollContainerSize)) {
-      this.parentContainer[scrollDirection] = 0;
+    let budgieElement = this.elementMeasurement(`budgie-flex-item-${this.budgieId}`);
+    let budgieElementMeasure = Math.floor(this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height);
+
+    console.log('On Scroll', this.parentContainer[scrollDirection], scrollContainerSize, scrollContainerSize + budgieElementMeasure)
+    if((this.parentContainer[scrollDirection] >= scrollContainerSize + budgieElementMeasure)) {
+      this.parentContainer[scrollDirection] = budgieElementMeasure;
     } else if((this.parentContainer[scrollDirection] <= 0 )) {
       this.parentContainer[scrollDirection] = scrollContainerSize;
     }
@@ -460,7 +466,7 @@ class Budgie {
       this.setupContainer();
       this.insertItems();
       this.appendExtraItems();
-      this.bindScrollListener();
+      this.setupScrollProperties();
     }
     if(this.options.autoScroll){
       this.startAnimation();

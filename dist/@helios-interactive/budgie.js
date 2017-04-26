@@ -72,14 +72,17 @@ var Budgie = function () {
       this.container = budgieFlexContainer;
     }
   }, {
-    key: 'bindScrollListener',
-    value: function bindScrollListener() {
+    key: 'setupScrollProperties',
+    value: function setupScrollProperties() {
       var self = this;
-      var scrollSize = this.scrollSizeMeasurement();
       var scrollDirection = this.scrollProperty();
 
-      if (this.options.inverted && this.isNew) {
-        this.parentContainer[scrollDirection] = scrollSize;
+      if (this.isNew) {
+        var budgieElement = this.elementMeasurement('budgie-flex-item-' + this.budgieId);
+        var budgieElementMeasure = this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height;
+
+        // Set the scroll position to the top of the non-duped elements
+        this.parentContainer[scrollDirection] = budgieElementMeasure;
       }
 
       this.parentContainer.addEventListener("scroll", function () {
@@ -395,9 +398,12 @@ var Budgie = function () {
     value: function onScroll(scrollDirection) {
       var scrollContainerSize = this.scrollSizeMeasurement();
 
-      console.log('On Scroll', this.parentContainer[scrollDirection], scrollContainerSize);
-      if (this.parentContainer[scrollDirection] >= scrollContainerSize) {
-        this.parentContainer[scrollDirection] = 0;
+      var budgieElement = this.elementMeasurement('budgie-flex-item-' + this.budgieId);
+      var budgieElementMeasure = Math.floor(this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height);
+
+      console.log('On Scroll', this.parentContainer[scrollDirection], scrollContainerSize, scrollContainerSize + budgieElementMeasure);
+      if (this.parentContainer[scrollDirection] >= scrollContainerSize + budgieElementMeasure) {
+        this.parentContainer[scrollDirection] = budgieElementMeasure;
       } else if (this.parentContainer[scrollDirection] <= 0) {
         this.parentContainer[scrollDirection] = scrollContainerSize;
       }
@@ -462,7 +468,7 @@ var Budgie = function () {
         this.setupContainer();
         this.insertItems();
         this.appendExtraItems();
-        this.bindScrollListener();
+        this.setupScrollProperties();
       }
       if (this.options.autoScroll) {
         this.startAnimation();
