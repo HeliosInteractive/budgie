@@ -407,7 +407,6 @@ class Budgie {
     let budgieElement = this.elementMeasurement(`budgie-flex-item-${this.budgieId}`);
     let budgieElementMeasure = Math.floor(this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height);
 
-    console.log('On Scroll', this.parentContainer[scrollDirection], scrollContainerSize, scrollContainerSize + budgieElementMeasure)
     if((this.parentContainer[scrollDirection] >= scrollContainerSize + budgieElementMeasure)) {
       this.parentContainer[scrollDirection] = budgieElementMeasure;
     } else if((this.parentContainer[scrollDirection] <= 0 )) {
@@ -427,6 +426,9 @@ class Budgie {
     }
   }
 
+  /**
+   * Controls the scrolling animation when budgie is set to autoscroll
+   */
   startAnimation() {
 
     const fps =  this.options.fps;
@@ -448,7 +450,7 @@ class Budgie {
 
         currentScroll = scrollContainer[scrollDirection];
 
-        this.options.inverted ? (currentScroll -= scrollSpeed) : (currentScroll += scrollSpeed);
+        this.options.inverted ? (currentScroll += scrollSpeed) : (currentScroll -= scrollSpeed);
 
         scrollContainer[scrollDirection] = currentScroll;
       }, 1000/fps);

@@ -401,7 +401,6 @@ var Budgie = function () {
       var budgieElement = this.elementMeasurement('budgie-flex-item-' + this.budgieId);
       var budgieElementMeasure = Math.floor(this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height);
 
-      console.log('On Scroll', this.parentContainer[scrollDirection], scrollContainerSize, scrollContainerSize + budgieElementMeasure);
       if (this.parentContainer[scrollDirection] >= scrollContainerSize + budgieElementMeasure) {
         this.parentContainer[scrollDirection] = budgieElementMeasure;
       } else if (this.parentContainer[scrollDirection] <= 0) {
@@ -423,6 +422,11 @@ var Budgie = function () {
         return 'scrollLeft';
       }
     }
+
+    /**
+     * Controls the scrolling animation when budgie is set to autoscroll
+     */
+
   }, {
     key: 'startAnimation',
     value: function startAnimation() {
@@ -447,7 +451,7 @@ var Budgie = function () {
 
           currentScroll = scrollContainer[scrollDirection];
 
-          _this5.options.inverted ? currentScroll -= scrollSpeed : currentScroll += scrollSpeed;
+          _this5.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
 
           scrollContainer[scrollDirection] = currentScroll;
         }, 1000 / fps);
