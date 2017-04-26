@@ -491,4 +491,4 @@ var InfiniteScroller = function () {
 }();
 
 if (typeof global !== 'undefined') global.InfiniteScroller = InfiniteScroller;
-//# sourceMappingURL=thrush.js.map
+//# sourceMappingURL=budgie.js.map
