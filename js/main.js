@@ -143,7 +143,7 @@ class InfiniteScroller {
     let direction = this.options.direction === 'horizontal' ? 'column' : 'row';
     document.styleSheets[0].insertRule(`.infinite-container-${this.position}{flex-direction: ${direction};}`, numOfSheets);
 
-    document.styleSheets[0].insertRule(`.infinite-flex-container-parent-${this.position}{overflow: hidden;}`, numOfSheets);
+    document.styleSheets[0].insertRule(`.infinite-flex-container-parent-${this.position}{overflow-x: ${this.options.direction === 'horizontal' ? 'scroll' : 'hidden'}; overflow-y: ${this.options.direction === 'vertical' ? 'scroll' : 'hidden'}}`, numOfSheets);
     document.styleSheets[0].insertRule(`.infinite-flex-container-parent-${this.position}::-webkit-scrollbar{display: none;}`, numOfSheets);
   }
 
