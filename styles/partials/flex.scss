@@ -21,15 +21,6 @@
 .budgie-flex-item{
   flex-grow: 0;
 }
-// .budgie-flex-item--filler{
-//   flex-grow: 10;
-// }
-// .budgie-flex-item--clear-vertical{
-//   margin-right: 0.1%;
-// }
-// .budgie-flex-item--clear-horizontal{
-//   margin-bottom: 0.1%;
-// }
 
 ////////////////////////////
 // for testing only
@@ -41,27 +32,6 @@ body {
   width: 50vw;
   height: 50vh;
   position: fixed;
-  left: 0;
-  top: 0;
-}
-.second {
-  width: 50vw;
-  height: 50vh;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-}
-.third {
-  width: 50vw;
-  height: 50vh;
-  position: fixed;
-  right: 0;
-  top: 0;
-}
-.fourth {
-  width: 50vw;
-  height: 50vh;
-  position: fixed;
-  right: 0;
-  bottom: 0;
+  left: 25%;
+  top: 25%;
 }
