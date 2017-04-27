@@ -14,7 +14,7 @@
 
 .budgie-flex-container-parent {
   overflow: -moz-scrollbars-none; }
-  .budgie-flex-container-parent ::-webkit-scrollbar {
+  .budgie-flex-container-parent::-webkit-scrollbar {
     display: none; }
 
 body {

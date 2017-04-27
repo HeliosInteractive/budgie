@@ -26,7 +26,7 @@
 }
 
 .budgie-flex-container-parent {
-  ::-webkit-scrollbar {
+  &::-webkit-scrollbar {
     display: none;
   }
   overflow: -moz-scrollbars-none;
