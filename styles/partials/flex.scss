@@ -19,7 +19,17 @@
 
 //Items
 .budgie-flex-item{
-  flex-grow: 0;
+  :first-child {
+    max-height: 100%;
+    max-width: 100%;
+  }
+}
+
+.budgie-flex-container-parent {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  overflow: -moz-scrollbars-none;
 }
 
 ////////////////////////////

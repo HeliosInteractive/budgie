@@ -86,6 +86,7 @@ class Budgie {
 
   setupContainer() {
     let parentContainer = this.constructor.getElement(this.selector);
+    parentContainer.classList.add(`budgie-flex-container-parent`);
     parentContainer.classList.add(`budgie-flex-container-parent-${this.budgieId}`);
     this.parentContainer = parentContainer;
 
@@ -142,7 +143,6 @@ class Budgie {
     document.styleSheets[0].insertRule(`.budgie-container-${this.budgieId}{flex-direction: ${direction};}`, numOfSheets);
 
     document.styleSheets[0].insertRule(`.budgie-flex-container-parent-${this.budgieId}{overflow-x: ${this.options.direction === 'horizontal' ? 'scroll' : 'hidden'}; overflow-y: ${this.options.direction === 'vertical' ? 'scroll' : 'hidden'}}`, numOfSheets);
-    document.styleSheets[0].insertRule(`.budgie-flex-container-parent-${this.budgieId}::-webkit-scrollbar{display: none;}`, numOfSheets);
   }
 
   static createElementForItem(item, id, budgieId){
@@ -150,11 +150,12 @@ class Budgie {
 
     if(typeof item === 'string') {
       e.style.backgroundImage = `url(${item})`;
+      e.classList.add(`budgie-flex-item-image-${budgieId}`);
     } else {
       e.appendChild(item);
     }
+    e.classList.add('budgie-flex-item');
     e.classList.add(`budgie-flex-item-${budgieId}`);
-    e.classList.add(`budgie-flex-item-image-${budgieId}`);
     e.classList.add(`budgie-${budgieId}-${id}`);
     return e;
   }
