@@ -86,6 +86,7 @@ class Budgie {
 
   setupContainer() {
     let parentContainer = this.constructor.getElement(this.selector);
+    parentContainer.classList.add(`budgie-flex-container-parent`);
     parentContainer.classList.add(`budgie-flex-container-parent-${this.budgieId}`);
     this.parentContainer = parentContainer;
 
@@ -142,7 +143,6 @@ class Budgie {
     document.styleSheets[0].insertRule(`.budgie-container-${this.budgieId}{flex-direction: ${direction};}`, numOfSheets);
 
     document.styleSheets[0].insertRule(`.budgie-flex-container-parent-${this.budgieId}{overflow-x: ${this.options.direction === 'horizontal' ? 'scroll' : 'hidden'}; overflow-y: ${this.options.direction === 'vertical' ? 'scroll' : 'hidden'}}`, numOfSheets);
-    document.styleSheets[0].insertRule(`.budgie-flex-container-parent-${this.budgieId}::-webkit-scrollbar{display: none;}`, numOfSheets);
   }
 
   static createElementForItem(item, id, budgieId){
@@ -150,11 +150,12 @@ class Budgie {
 
     if(typeof item === 'string') {
       e.style.backgroundImage = `url(${item})`;
+      e.classList.add(`budgie-flex-item-image-${budgieId}`);
     } else {
       e.appendChild(item);
     }
+    e.classList.add('budgie-flex-item');
     e.classList.add(`budgie-flex-item-${budgieId}`);
-    e.classList.add(`budgie-flex-item-image-${budgieId}`);
     e.classList.add(`budgie-${budgieId}-${id}`);
     return e;
   }
@@ -432,7 +433,6 @@ class Budgie {
    * Controls the scrolling animation when budgie is set to autoscroll
    */
   startAnimation() {
-console.log('starting')
     const fps =  this.options.fps;
 
     let scrollDirection = this.scrollProperty();
@@ -448,7 +448,6 @@ console.log('starting')
     // always clear interval to ensure that only one scroller is running
     this.stop();
     if(this.items.length > this.elementsOnScreen()){
-      console.log('enough items')
 
       this.interval = setInterval(() => {
         let scrollDirection = this.scrollProperty()
@@ -456,7 +455,6 @@ console.log('starting')
         currentScroll = scrollContainer[scrollDirection];
 
         this.options.inverted ? (currentScroll += scrollSpeed) : (currentScroll -= scrollSpeed);
-        console.log('inside loop: ', scrollDirection, currentScroll, scrollSpeed)
 
         scrollContainer[scrollDirection] = currentScroll;
       }, 1000/fps);
@@ -477,7 +475,6 @@ console.log('starting')
       this.setupScrollProperties();
     }
     if(this.options.autoScroll){
-      console.log('its autoscroll')
       this.startAnimation();
     }
     this.isNew = false;
