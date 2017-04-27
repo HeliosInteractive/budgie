@@ -131,7 +131,7 @@ var Budgie = function () {
       this.items.forEach(function (item, id) {
         // Add a filler item so that odd ending lists will have a centered ending
         if (_this.numberLeftWithOddEnding() > 0 && _this.items.length - _this.numberLeftWithOddEnding() === id) {
-          _this.container.appendChild(_this.newFillerItem());
+          _this.container.appendChild(_this.newFillerItem('ending'));
         }
 
         // Add the item
@@ -139,7 +139,7 @@ var Budgie = function () {
 
         // Add a filler item so that odd ending lists will have a centered ending
         if (_this.numberLeftWithOddEnding() > 0 && _this.items.length === id + 1) {
-          _this.container.appendChild(_this.newFillerItem());
+          _this.container.appendChild(_this.newFillerItem('ending'));
         }
       });
       if (this.items.length < this.elementsOnScreen()) {
@@ -149,24 +149,76 @@ var Budgie = function () {
         this.container.appendChild(blankEle);
       }
     }
+
+    /**
+     * Creates a filler element of the given type
+     * @param {String} - either 'start' or 'ending'
+     * @returns {Element}
+     */
+
   }, {
     key: 'newFillerItem',
-    value: function newFillerItem() {
+    value: function newFillerItem(type) {
       var filler = document.createElement('div');
       filler.classList.add('budgie-flex-item-' + this.budgieId + '--filler');
+      filler.classList.add('budgie-flex-item-' + this.budgieId + '--filler-' + type);
       filler.classList.add('budgie-flex-item-' + this.budgieId + '--filler-' + this.numberLeftWithOddEnding());
       return filler;
     }
 
     /**
-     * Appends duplicate items equal to the number that fit in the view (numberHigh * numberWide)
      * Prepends duplicate items equal to the last row/column of items
+     */
+
+  }, {
+    key: 'prependExtraItems',
+    value: function prependExtraItems() {
+      var _this2 = this;
+
+      var elementsOnScreen = this.elementsOnScreen();
+      // Store a list of the non duplicated elements
+      var realElements = Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId));
+
+      // Prepends duplicate items equal to the number of elementsOnScreen
+      if (this.items.length > elementsOnScreen) {
+        if (this.numberLeftWithOddEnding() > 0) {
+          // The column or row is NOT full, fillers are needed
+          // Add a filler item so that odd ending lists will have a centered ending
+          this.container.insertAdjacentElement('afterbegin', this.newFillerItem('start'));
+
+          // Add the duplicated elements
+          realElements.slice(realElements.length - this.numberLeftWithOddEnding(), realElements.length).reverse().forEach(function (element) {
+            var ele = element.cloneNode(true);
+            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
+            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--start');
+            _this2.container.insertAdjacentElement('afterbegin', ele);
+          });
+
+          // Add a filler item so that odd ending lists will have a centered ending
+          this.container.insertAdjacentElement('afterbegin', this.newFillerItem('start'));
+        } else {
+          // The column or row is full, not fillers needed
+          var elementsToDupe = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+
+          // Add the duplicated elements
+          realElements.slice(realElements.length - elementsToDupe, realElements.length).reverse().forEach(function (element) {
+            var ele = element.cloneNode(true);
+            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
+            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--start');
+            _this2.container.insertAdjacentElement('afterbegin', ele);
+          });
+        }
+      }
+    }
+
+    /**
+     * Appends duplicate items equal to the number that fit in the view (numberHigh * numberWide)
      */
 
   }, {
     key: 'appendExtraItems',
     value: function appendExtraItems() {
-      var _this2 = this;
+      var _this3 = this;
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
@@ -177,36 +229,10 @@ var Budgie = function () {
         // Appends duplicate items equal to the number of elementsOnScreen
         realElements.slice(0, elementsOnScreen).forEach(function (element) {
           var ele = element.cloneNode(true);
-          ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
-          _this2.container.insertAdjacentElement('beforeend', ele);
+          ele.classList.add('budgie-flex-item-' + _this3.budgieId + '--duplicate');
+          ele.classList.add('budgie-flex-item-' + _this3.budgieId + '--ending');
+          _this3.container.insertAdjacentElement('beforeend', ele);
         });
-
-        // Prepends duplicate items equal to the number of elementsOnScreen
-        if (this.numberLeftWithOddEnding() > 0) {
-          // The column or row is NOT full, fillers are needed
-          // Add a filler item so that odd ending lists will have a centered ending
-          this.container.insertAdjacentElement('afterbegin', this.newFillerItem());
-
-          // Add the duplicated elements
-          realElements.slice(realElements.length - this.numberLeftWithOddEnding(), realElements.length).reverse().forEach(function (element) {
-            var ele = element.cloneNode(true);
-            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
-            _this2.container.insertAdjacentElement('afterbegin', ele);
-          });
-
-          // Add a filler item so that odd ending lists will have a centered ending
-          this.container.insertAdjacentElement('afterbegin', this.newFillerItem());
-        } else {
-          // The column or row is full, not fillers needed
-          var elementsToDupe = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
-
-          // Add the duplicated elements
-          realElements.slice(realElements.length - elementsToDupe, realElements.length).reverse().forEach(function (element) {
-            var ele = element.cloneNode(true);
-            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
-            _this2.container.insertAdjacentElement('afterbegin', ele);
-          });
-        }
       }
     }
   }, {
@@ -268,7 +294,9 @@ var Budgie = function () {
       var eleIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.items.length;
 
       var elements = document.getElementsByClassName('budgie-' + this.budgieId + '-' + eleIndex);
-      elements[0].parentNode.removeChild(elements[0]);
+      Array.from(elements).forEach(function (element) {
+        element.parentNode.removeChild(element);
+      });
     }
   }, {
     key: 'addLastItem',
@@ -281,21 +309,62 @@ var Budgie = function () {
       var newElement = this.constructor.createElementForItem(this.items[itemIndex], itemIndex, this.budgieId);
       elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
     }
+
+    /**
+     * Will accept an item, and output that as the correct element
+     * @param item
+     */
+
   }, {
     key: 'updateExistingItems',
+
+
+    /**
+     * Updates the existing items by replacing their html
+     */
     value: function updateExistingItems() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.items.forEach(function (item, index) {
-        Array.from(document.getElementsByClassName('budgie-' + _this3.budgieId + '-' + index)).forEach(function (element) {
-          return element.style.backgroundImage = 'url(' + item + ')';
+        Array.from(document.getElementsByClassName('budgie-' + _this4.budgieId + '-' + index)).forEach(function (element) {
+          // If the element has changed then update, otherwise do nothing
+          if (element.innerHTML !== _this4.constructor.createItemAsElement(item).outerHTML) {
+            element.innerHTML = _this4.constructor.createItemAsElement(item);
+          }
         });
       });
     }
   }, {
+    key: 'updateListStart',
+    value: function updateListStart(method) {
+      var redraw = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      var numberToCopy = void 0;
+      if (this.numberLeftWithOddEnding() > 0) {
+        numberToCopy = this.numberLeftWithOddEnding();
+      } else {
+        numberToCopy = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+      }
+
+      if (redraw) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler-start')).forEach(function (element) {
+          return element.parentNode.removeChild(element);
+        });
+      }
+
+      this.items.slice(this.items.length);
+    }
+
+    /**
+     * Updates the Duplicated elements that are on the end of the list.
+     * @param method
+     * @param redraw
+     */
+
+  }, {
     key: 'updateListEnding',
     value: function updateListEnding(method) {
-      var _this4 = this;
+      var _this5 = this;
 
       var redraw = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
@@ -309,30 +378,32 @@ var Budgie = function () {
         throw new Error("Only 'add' and 'remove' are supported arguments");
       }
 
-      if (redraw) Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
-        return element.parentNode.removeChild(element);
-      });
+      if (redraw) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler-ending')).forEach(function (element) {
+          return element.parentNode.removeChild(element);
+        });
+      }
 
       if (this.numberLeftWithOddEnding() > 0) {
-        if (document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler').length === 0) {
+        if (document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler-ending').length === 0) {
           var lastElement = document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - 1))[0];
           var firstElement = document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - this.numberLeftWithOddEnding()))[0];
-          firstElement.parentNode.insertBefore(this.newFillerItem(), firstElement);
-          lastElement.parentNode.insertBefore(this.newFillerItem(), lastElement.nextSibling);
+          firstElement.parentNode.insertBefore(this.newFillerItem('ending'), firstElement);
+          lastElement.parentNode.insertBefore(this.newFillerItem('ending'), lastElement.nextSibling);
         } else {
-          Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
-            element.classList.remove('budgie-flex-item-' + _this4.budgieId + '--filler-' + (_this4.numberLeftWithOddEnding() + operator));
-            element.classList.add('budgie-flex-item-' + _this4.budgieId + '--filler-' + _this4.numberLeftWithOddEnding());
+          Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler-ending')).forEach(function (element) {
+            element.classList.remove('budgie-flex-item-' + _this5.budgieId + '--filler-' + (_this5.numberLeftWithOddEnding() + operator));
+            element.classList.add('budgie-flex-item-' + _this5.budgieId + '--filler-' + _this5.numberLeftWithOddEnding());
           });
         }
       } else {
-        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler-ending')).forEach(function (element) {
           return element.parentNode.removeChild(element);
         });
       }
 
       if (this.items.length <= this.elementsOnScreen()) {
-        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--duplicate')).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--ending')).forEach(function (element) {
           return element.parentNode.removeChild(element);
         });
 
@@ -430,7 +501,7 @@ var Budgie = function () {
   }, {
     key: 'startAnimation',
     value: function startAnimation() {
-      var _this5 = this;
+      var _this6 = this;
 
       var fps = this.options.fps;
 
@@ -449,11 +520,11 @@ var Budgie = function () {
       if (this.items.length > this.elementsOnScreen()) {
 
         this.interval = setInterval(function () {
-          var scrollDirection = _this5.scrollProperty();
+          var scrollDirection = _this6.scrollProperty();
 
           currentScroll = scrollContainer[scrollDirection];
 
-          _this5.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
+          _this6.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
 
           scrollContainer[scrollDirection] = currentScroll;
         }, 1000 / fps);
@@ -473,6 +544,7 @@ var Budgie = function () {
       if (this.isNew) {
         this.setupContainer();
         this.insertItems();
+        this.prependExtraItems();
         this.appendExtraItems();
         this.setupScrollProperties();
       }
@@ -570,6 +642,35 @@ var Budgie = function () {
       e.classList.add('budgie-flex-item-' + budgieId);
       e.classList.add('budgie-' + budgieId + '-' + id);
       return e;
+    }
+  }, {
+    key: 'createItemAsElement',
+    value: function createItemAsElement(item) {
+      // If the item is a dom element, then return it
+      if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') return item;
+
+      if (typeof item !== 'String') throw new Error('Only DOM Elements and strings are accepted as budgie items');
+
+      var extension = item.match(/\.{1}\w*$/);
+      if (extension) {
+        extension = extension[0].substr(1);
+      }
+
+      var imageExtensions = ['jpg', 'gif', 'png'];
+      var videoExtensions = ['mp4', 'ogg', 'webm'];
+
+      var element = void 0;
+      if (imageExtensions.includes(extension)) {
+        element = document.createElement('img');
+        element.src = item;
+      } else if (videoExtensions.includes(extension)) {
+        element = document.createElement('video');
+        element.src = item;
+      }
+
+      if (!element) throw new Error('Extension of: ' + extension + ' is not supported.');
+
+      return element;
     }
   }]);
 

@@ -164,7 +164,7 @@ class Budgie {
     this.items.forEach((item, id) => {
       // Add a filler item so that odd ending lists will have a centered ending
       if(this.numberLeftWithOddEnding() > 0 && (this.items.length - this.numberLeftWithOddEnding() === id)){
-        this.container.appendChild(this.newFillerItem());
+        this.container.appendChild(this.newFillerItem('ending'));
       }
 
       // Add the item
@@ -172,7 +172,7 @@ class Budgie {
 
       // Add a filler item so that odd ending lists will have a centered ending
       if(this.numberLeftWithOddEnding() > 0 && (this.items.length === id + 1)){
-        this.container.appendChild(this.newFillerItem());
+        this.container.appendChild(this.newFillerItem('ending'));
       }
     });
     if(this.items.length < this.elementsOnScreen()){
@@ -183,17 +183,71 @@ class Budgie {
     }
   }
 
-
-  newFillerItem(){
+  /**
+   * Creates a filler element of the given type
+   * @param {String} - either 'start' or 'ending'
+   * @returns {Element}
+   */
+  newFillerItem(type){
     let filler = document.createElement('div');
     filler.classList.add(`budgie-flex-item-${this.budgieId}--filler`);
+    filler.classList.add(`budgie-flex-item-${this.budgieId}--filler-${type}`);
     filler.classList.add(`budgie-flex-item-${this.budgieId}--filler-${this.numberLeftWithOddEnding()}`);
     return filler;
   }
 
   /**
-   * Appends duplicate items equal to the number that fit in the view (numberHigh * numberWide)
    * Prepends duplicate items equal to the last row/column of items
+   */
+  prependExtraItems(){
+    let elementsOnScreen = this.elementsOnScreen();
+    // Store a list of the non duplicated elements
+    const realElements = Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}`));
+
+    // Prepends duplicate items equal to the number of elementsOnScreen
+    if(this.items.length > elementsOnScreen) {
+      if(this.numberLeftWithOddEnding() > 0) {
+        // The column or row is NOT full, fillers are needed
+        // Add a filler item so that odd ending lists will have a centered ending
+        this.container.insertAdjacentElement('afterbegin', this.newFillerItem('start'));
+
+        // Add the duplicated elements
+        realElements.slice(
+          realElements.length - this.numberLeftWithOddEnding(),
+          realElements.length
+        )
+          .reverse()
+          .forEach((element) => {
+            let ele = element.cloneNode(true);
+            ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
+            ele.classList.add(`budgie-flex-item-${this.budgieId}--start`);
+            this.container.insertAdjacentElement('afterbegin', ele);
+          });
+
+        // Add a filler item so that odd ending lists will have a centered ending
+        this.container.insertAdjacentElement('afterbegin', this.newFillerItem('start'));
+      } else {
+        // The column or row is full, not fillers needed
+        let elementsToDupe = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+
+        // Add the duplicated elements
+        realElements.slice(
+          realElements.length - elementsToDupe,
+          realElements.length
+        )
+          .reverse()
+          .forEach((element) => {
+            let ele = element.cloneNode(true);
+            ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
+            ele.classList.add(`budgie-flex-item-${this.budgieId}--start`);
+            this.container.insertAdjacentElement('afterbegin', ele);
+          });
+      }
+    }
+  }
+
+  /**
+   * Appends duplicate items equal to the number that fit in the view (numberHigh * numberWide)
    */
   appendExtraItems(){
     let elementsOnScreen = this.elementsOnScreen();
@@ -210,45 +264,10 @@ class Budgie {
         .forEach((element) => {
           let ele = element.cloneNode(true);
           ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
+          ele.classList.add(`budgie-flex-item-${this.budgieId}--ending`);
           this.container.insertAdjacentElement('beforeend', ele);
         });
 
-      // Prepends duplicate items equal to the number of elementsOnScreen
-      if(this.numberLeftWithOddEnding() > 0) {
-        // The column or row is NOT full, fillers are needed
-        // Add a filler item so that odd ending lists will have a centered ending
-        this.container.insertAdjacentElement('afterbegin', this.newFillerItem());
-
-        // Add the duplicated elements
-        realElements.slice(
-          realElements.length - this.numberLeftWithOddEnding(),
-          realElements.length
-        )
-          .reverse()
-          .forEach((element) => {
-            let ele = element.cloneNode(true);
-            ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
-            this.container.insertAdjacentElement('afterbegin', ele);
-          });
-
-        // Add a filler item so that odd ending lists will have a centered ending
-        this.container.insertAdjacentElement('afterbegin', this.newFillerItem());
-      } else {
-        // The column or row is full, not fillers needed
-        let elementsToDupe = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
-
-        // Add the duplicated elements
-        realElements.slice(
-          realElements.length - elementsToDupe,
-          realElements.length
-        )
-          .reverse()
-          .forEach((element) => {
-            let ele = element.cloneNode(true);
-            ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
-            this.container.insertAdjacentElement('afterbegin', ele);
-          });
-      }
     }
   }
 
@@ -301,7 +320,9 @@ class Budgie {
 
   removeLastItem(eleIndex = this.items.length){
     let elements = document.getElementsByClassName(`budgie-${this.budgieId}-${eleIndex}`);
-    elements[0].parentNode.removeChild(elements[0]);
+    Array.from(elements).forEach(element => {
+      element.parentNode.removeChild(element);
+    })
   }
 
   addLastItem(itemIndex = this.items.length - 1, eleIndex = this.items.length - 2){
@@ -311,13 +332,78 @@ class Budgie {
     elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
   }
 
+  /**
+   * Will accept an item, and output that as the correct element
+   * @param item
+   */
+  static createItemAsElement(item){
+    // If the item is a dom element, then return it
+    if(typeof item === 'object' ) return item;
+
+    if(typeof item !== 'String') throw new Error('Only DOM Elements and strings are accepted as budgie items')
+
+    let extension = item.match(/\.{1}\w*$/)
+    if(extension) {
+      extension = extension[0].substr(1)
+    }
+
+    const imageExtensions = ['jpg', 'gif', 'png'];
+    const videoExtensions = ['mp4','ogg', 'webm'];
+
+    let element;
+    if(imageExtensions.includes(extension)) {
+      element = document.createElement('img');
+      element.src = item
+    } else if(videoExtensions.includes(extension)) {
+      element = document.createElement('video');
+      element.src = item
+    }
+
+    if(!element) throw new Error(`Extension of: ${extension} is not supported.`)
+
+    return element;
+  }
+
+  /**
+   * Updates the existing items by replacing their html
+   */
   updateExistingItems(){
     this.items.forEach((item, index) => {
-      Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${index}`)).forEach(element =>
-        element.style.backgroundImage = `url(${item})`);
+      Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${index}`)).forEach((element) => {
+        // If the element has changed then update, otherwise do nothing
+        if (element.innerHTML !== this.constructor.createItemAsElement(item).outerHTML) {
+          element.innerHTML = this.constructor.createItemAsElement(item);
+        }
+      });
     });
   }
 
+
+  updateListStart(method, redraw=false){
+    let numberToCopy;
+    if(this.numberLeftWithOddEnding() > 0){
+      numberToCopy = this.numberLeftWithOddEnding();
+    } else {
+      numberToCopy = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+    }
+
+    if(redraw) {
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler-start`)).forEach(element =>
+        element.parentNode.removeChild(element));
+    }
+
+
+    // If the number of items decreases to be less than the number that fit, then remove all extra items
+    if(this.items.length <= this.elementsOnScreen()) {
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--start`)).forEach(element =>
+        element.parentNode.removeChild(element));
+    }
+
+  /**
+   * Updates the Duplicated elements that are on the end of the list.
+   * @param method
+   * @param redraw
+   */
   updateListEnding(method, redraw=false){
     let operator;
     if(method === 'remove'){
@@ -329,29 +415,31 @@ class Budgie {
       throw new Error("Only 'add' and 'remove' are supported arguments")
     }
 
-    if(redraw)
-      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach(element =>
+    if(redraw) {
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler-ending`)).forEach(element =>
         element.parentNode.removeChild(element));
+    }
 
     if(this.numberLeftWithOddEnding() > 0){
-      if(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`).length === 0) {
+      if(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler-ending`).length === 0) {
         let lastElement = document.getElementsByClassName(`budgie-${this.budgieId}-${this.items.length - 1}`)[0];
         let firstElement = document.getElementsByClassName(`budgie-${this.budgieId}-${this.items.length - this.numberLeftWithOddEnding()}`)[0];
-        firstElement.parentNode.insertBefore(this.newFillerItem(), firstElement);
-        lastElement.parentNode.insertBefore(this.newFillerItem(), lastElement.nextSibling);
+        firstElement.parentNode.insertBefore(this.newFillerItem('ending'), firstElement);
+        lastElement.parentNode.insertBefore(this.newFillerItem('ending'), lastElement.nextSibling);
       } else {
-        Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach((element) => {
+        // Change the CSS of the ending filler elements
+        Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler-ending`)).forEach((element) => {
           element.classList.remove(`budgie-flex-item-${this.budgieId}--filler-${this.numberLeftWithOddEnding() + operator}`);
           element.classList.add(`budgie-flex-item-${this.budgieId}--filler-${this.numberLeftWithOddEnding()}`);
         });
       }
     } else {
-      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler-ending`)).forEach(element =>
         element.parentNode.removeChild(element));
     }
 
     if(this.items.length <= this.elementsOnScreen()) {
-      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--duplicate`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--ending`)).forEach(element =>
         element.parentNode.removeChild(element));
 
       // Append an extra div so that new items can be added
@@ -362,8 +450,11 @@ class Budgie {
       }
     }
 
+    // If the number of elements has increased to more than the number that fit in the viewport
+    // Then add the duplicate items
     if(this.items.length > this.elementsOnScreen() && document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--duplicate`).length === 0){
       this.appendExtraItems();
+      this.prependExtraItems();
 
       Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--blank`)).forEach(blankEle =>
         blankEle.parentNode.removeChild(blankEle));
@@ -471,6 +562,7 @@ class Budgie {
     if(this.isNew){
       this.setupContainer();
       this.insertItems();
+      this.prependExtraItems();
       this.appendExtraItems();
       this.setupScrollProperties();
     }
