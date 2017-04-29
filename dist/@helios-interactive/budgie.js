@@ -105,7 +105,8 @@ var Budgie = function () {
         numOfSheets = document.styleSheets[0].cssRules.length;
       }
 
-      var numberAcross = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+      // Take the larger of the two
+      var numberAcross = this.options.numberHigh >= this.options.numberWide ? this.options.numberHigh : this.options.numberWide;
 
       // Width in %
       var width = eleWidth / this.options.numberWide / eleWidth * 100;
@@ -115,7 +116,7 @@ var Budgie = function () {
       document.styleSheets[0].insertRule('.budgie-flex-item-image-' + this.budgieId + '{background-size: ' + this.options.imageFit + ';}', numOfSheets);
 
       for (var i = numberAcross - 1; i >= 0; i--) {
-        document.styleSheets[0].insertRule('.budgie-flex-item-' + this.budgieId + '--filler-' + i + '{width: ' + width * (numberAcross - i) / 2 + '%; height: ' + height * (numberAcross - i) / 2 + '%; flex-grow: 1;}', numOfSheets);
+        document.styleSheets[0].insertRule('.budgie-flex-item-' + this.budgieId + '--filler-' + i + '{width: ' + width * (this.options.numberWide - i) / 2 + '%; height: ' + height * (this.options.numberHigh - i) / 2 + '%; flex-grow: 1;}', numOfSheets);
       }
 
       var direction = this.options.direction === 'horizontal' ? 'column' : 'row';
@@ -135,7 +136,7 @@ var Budgie = function () {
         }
 
         // Add the item
-        _this.container.appendChild(_this.constructor.createElementForItem(item, id, _this.budgieId));
+        _this.container.appendChild(_this.createBudgieDiv(item, id));
 
         // Add a filler item so that odd ending lists will have a centered ending
         if (_this.numberLeftWithOddEnding() > 0 && _this.items.length === id + 1) {
@@ -159,28 +160,20 @@ var Budgie = function () {
     }
 
     /**
-     * Appends duplicate items equal to the number that fit in the view (numberHigh * numberWide)
      * Prepends duplicate items equal to the last row/column of items
      */
 
   }, {
-    key: 'appendExtraItems',
-    value: function appendExtraItems() {
+    key: 'prependStartingItems',
+    value: function prependStartingItems() {
       var _this2 = this;
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
-      var realElements = Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId));
+      var realElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)'));
 
       // If the number of elements is greater than the number that fit in the given area
       if (this.items.length > elementsOnScreen) {
-        // Appends duplicate items equal to the number of elementsOnScreen
-        realElements.slice(0, elementsOnScreen).forEach(function (element) {
-          var ele = element.cloneNode(true);
-          ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
-          _this2.container.insertAdjacentElement('beforeend', ele);
-        });
-
         // Prepends duplicate items equal to the number of elementsOnScreen
         if (this.numberLeftWithOddEnding() > 0) {
           // The column or row is NOT full, fillers are needed
@@ -209,6 +202,31 @@ var Budgie = function () {
         }
       }
     }
+
+    /**
+     * Appends duplicate items equal to the number that fit in the view (numberHigh * numberWide)
+     */
+
+  }, {
+    key: 'appendEndingItems',
+    value: function appendEndingItems() {
+      var _this3 = this;
+
+      var elementsOnScreen = this.elementsOnScreen();
+      // Store a list of the non duplicated elements
+      var realElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)'));
+
+      // If the number of elements is greater than the number that fit in the given area
+      if (this.items.length > elementsOnScreen) {
+        // Appends duplicate items equal to the number of elementsOnScreen
+        realElements.slice(0, elementsOnScreen).forEach(function (element) {
+          var ele = element.cloneNode(true);
+          ele.classList.add('budgie-flex-item-' + _this3.budgieId + '--duplicate');
+          ele.classList.add('budgie-flex-item-' + _this3.budgieId + '--duplicate-ending');
+          _this3.container.insertAdjacentElement('beforeend', ele);
+        });
+      }
+    }
   }, {
     key: 'elementsOnScreen',
     value: function elementsOnScreen() {
@@ -218,14 +236,14 @@ var Budgie = function () {
     key: 'pushItem',
     value: function pushItem() {
       this.addLastItem();
-      this.updateListEnding('add');
+      this.updateBeginningAndEndingItems('add');
       this.start();
     }
   }, {
     key: 'popItem',
     value: function popItem() {
       this.removeLastItem();
-      this.updateListEnding('remove');
+      this.updateBeginningAndEndingItems('remove');
       this.start();
     }
   }, {
@@ -233,7 +251,7 @@ var Budgie = function () {
     value: function shiftItem() {
       this.updateExistingItems();
       this.removeLastItem();
-      this.updateListEnding('remove');
+      this.updateBeginningAndEndingItems('remove');
       this.start();
     }
   }, {
@@ -241,7 +259,7 @@ var Budgie = function () {
     value: function unshiftItem() {
       this.updateExistingItems();
       this.addLastItem();
-      this.updateListEnding('add');
+      this.updateBeginningAndEndingItems('add');
       this.start();
     }
   }, {
@@ -252,12 +270,12 @@ var Budgie = function () {
         for (var i = elementCount; i < this.items.length; i++) {
           this.addLastItem(i, i - 1);
         }
-        this.updateListEnding('add', true);
+        this.updateBeginningAndEndingItems('add', true);
       } else if (this.items.length < elementCount) {
         for (var _i = elementCount; _i > this.items.length; _i--) {
           this.removeLastItem(_i - 1);
         }
-        this.updateListEnding('remove', true);
+        this.updateBeginningAndEndingItems('remove', true);
       }
       this.updateExistingItems();
       this.start();
@@ -268,7 +286,9 @@ var Budgie = function () {
       var eleIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.items.length;
 
       var elements = document.getElementsByClassName('budgie-' + this.budgieId + '-' + eleIndex);
-      elements[0].parentNode.removeChild(elements[0]);
+      Array.from(elements).forEach(function (element) {
+        element.parentNode.removeChild(element);
+      });
     }
   }, {
     key: 'addLastItem',
@@ -278,24 +298,155 @@ var Budgie = function () {
 
       // eleIndex; subtract 2 to account for using length not index, and also to get the last element before the push
       var elements = document.getElementsByClassName('budgie-' + this.budgieId + '-' + eleIndex);
-      var newElement = this.constructor.createElementForItem(this.items[itemIndex], itemIndex, this.budgieId);
-      elements[0].parentNode.insertBefore(newElement, elements[0].nextSibling);
+      if (!elements.length > 0) {
+        elements = document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank');
+      }
+      var newElement = this.createBudgieDiv(this.items[itemIndex], itemIndex);
+      // Insert at the end of the main list
+      // We use index of 1, because the last few items are duplicated at the top
+      var index = 0;
+      if (elements.length > 1) {
+        index = 1;
+      }
+      elements[index].parentNode.insertBefore(newElement, elements[index].nextSibling);
     }
+  }, {
+    key: 'createBudgieDiv',
+    value: function createBudgieDiv(item, itemIndex) {
+      var element = document.createElement('div');
+
+      element.classList.add('budgie-flex-item');
+      element.classList.add('budgie-flex-item-' + this.budgieId);
+      element.classList.add('budgie-' + this.budgieId + '-' + itemIndex);
+
+      var innerDiv = this.createItemAsElement(item);
+
+      element.innerHTML = innerDiv.outerHTML;
+
+      return element;
+    }
+  }, {
+    key: 'createItemAsElement',
+    value: function createItemAsElement(item, itemIndex) {
+      // If the item is a dom element, then return it
+      if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') return item;
+
+      if (typeof item !== 'string') throw new Error('Only DOM Elements and strings are accepted as budgie items');
+
+      var extension = item.match(/\.{1}\w*$/);
+      if (extension) {
+        extension = extension[0].substr(1);
+      }
+
+      var imageExtensions = ['jpg', 'gif', 'png'];
+      var videoExtensions = ['mp4', 'ogg', 'webm'];
+
+      console.log(item, extension);
+      var element = void 0;
+      if (imageExtensions.includes(extension)) {
+        element = document.createElement('img');
+        element.src = item;
+      } else if (videoExtensions.includes(extension)) {
+        element = document.createElement('video');
+        element.src = item;
+      }
+
+      if (!element) throw new Error('Extension of: ' + extension + ' is not supported.');
+
+      return element;
+    }
+
+    /**
+     * Updates the existing items by replacing their html
+     */
+
   }, {
     key: 'updateExistingItems',
     value: function updateExistingItems() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.items.forEach(function (item, index) {
-        Array.from(document.getElementsByClassName('budgie-' + _this3.budgieId + '-' + index)).forEach(function (element) {
-          return element.style.backgroundImage = 'url(' + item + ')';
+        Array.from(document.getElementsByClassName('budgie-' + _this4.budgieId + '-' + index)).forEach(function (element) {
+          // If the element has changed then update, otherwise do nothing
+          var newElement = _this4.createItemAsElement(item).outerHTML;
+          if (element.innerHTML !== newElement) {
+            element.innerHTML = newElement;
+          }
         });
       });
     }
   }, {
+    key: 'updateBeginningAndEndingItems',
+    value: function updateBeginningAndEndingItems(method) {
+      this.updateListStart();
+      this.updateListEnding(method);
+    }
+  }, {
+    key: 'updateListStart',
+    value: function updateListStart() {
+      var _this5 = this;
+
+      var numberAtTop = void 0;
+      if (this.numberLeftWithOddEnding() > 0) {
+        numberAtTop = this.numberLeftWithOddEnding();
+      } else {
+        numberAtTop = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+      }
+
+      var realElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)'));
+
+      // Trim the number of elements across one row to get rid of the bottom dupes
+      var dupedElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + '.budgie-flex-item-' + this.budgieId + '--duplicate'));
+      var topOfDupedElements = dupedElements.slice(0, dupedElements.length - this.elementsOnScreen());
+
+      // These elements should become the new duped top row
+      var lastRowOfRealElements = realElements.slice(realElements.length - numberAtTop, realElements.length);
+
+      var firstRealElement = realElements[0];
+
+      console.log('Updating List Start', numberAtTop, lastRowOfRealElements, topOfDupedElements, firstRealElement);
+
+      // If there are more existing elements than we need, then trim that list
+      if (topOfDupedElements.length > lastRowOfRealElements.length) {
+        var numberOff = topOfDupedElements.length - lastRowOfRealElements.length;
+        console.log('Need to remove', numberOff);
+
+        for (var i = 0; i < numberOff; i += 1) {
+          console.log('removing elements', i, topOfDupedElements[i]);
+          topOfDupedElements[i].parentNode.removeChild(topOfDupedElements[i]);
+          topOfDupedElements.shift();
+        }
+      }
+
+      // Exit early if the list is not long enough to scroll
+      if (this.items.length <= this.elementsOnScreen()) {
+        return;
+      }
+
+      // Update the existing elements, and add new if needed
+      lastRowOfRealElements.forEach(function (element, index) {
+        var ele = element.cloneNode(true);
+        ele.classList.add('budgie-flex-item-' + _this5.budgieId + '--duplicate');
+        if (topOfDupedElements[index]) {
+          console.log('replacing existing');
+          topOfDupedElements[index].outerHTML = ele.outerHTML;
+        } else {
+          console.log('adding new');
+          firstRealElement.parentNode.insertBefore(ele, firstRealElement);
+        }
+      });
+    }
+
+    /**
+     * Updates the Duplicated elements that are on the end of the list.
+     * @param method
+     * @param redraw
+     */
+
+  }, {
     key: 'updateListEnding',
     value: function updateListEnding(method) {
-      var _this4 = this;
+      var _this6 = this;
 
       var redraw = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
@@ -315,14 +466,19 @@ var Budgie = function () {
 
       if (this.numberLeftWithOddEnding() > 0) {
         if (document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler').length === 0) {
-          var lastElement = document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - 1))[0];
-          var firstElement = document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - this.numberLeftWithOddEnding()))[0];
-          firstElement.parentNode.insertBefore(this.newFillerItem(), firstElement);
-          lastElement.parentNode.insertBefore(this.newFillerItem(), lastElement.nextSibling);
+          var lastElements = Array.from(document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - 1)));
+          var firstElements = Array.from(document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - this.numberLeftWithOddEnding())));
+          // Put fill around all elements that need it. At the top, and the bottom.
+          lastElements.forEach(function (lastElement) {
+            lastElement.parentNode.insertBefore(_this6.newFillerItem(), lastElement.nextSibling);
+          });
+          firstElements.forEach(function (firstElement) {
+            firstElement.parentNode.insertBefore(_this6.newFillerItem(), firstElement);
+          });
         } else {
           Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
-            element.classList.remove('budgie-flex-item-' + _this4.budgieId + '--filler-' + (_this4.numberLeftWithOddEnding() + operator));
-            element.classList.add('budgie-flex-item-' + _this4.budgieId + '--filler-' + _this4.numberLeftWithOddEnding());
+            element.classList.remove('budgie-flex-item-' + _this6.budgieId + '--filler-' + (_this6.numberLeftWithOddEnding() + operator));
+            element.classList.add('budgie-flex-item-' + _this6.budgieId + '--filler-' + _this6.numberLeftWithOddEnding());
           });
         }
       } else {
@@ -344,8 +500,8 @@ var Budgie = function () {
         }
       }
 
-      if (this.items.length > this.elementsOnScreen() && document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--duplicate').length === 0) {
-        this.appendExtraItems();
+      if (this.items.length > this.elementsOnScreen() && document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--duplicate-ending').length === 0) {
+        this.appendEndingItems();
 
         Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank')).forEach(function (blankEle) {
           return blankEle.parentNode.removeChild(blankEle);
@@ -430,7 +586,7 @@ var Budgie = function () {
   }, {
     key: 'startAnimation',
     value: function startAnimation() {
-      var _this5 = this;
+      var _this7 = this;
 
       var fps = this.options.fps;
 
@@ -449,11 +605,11 @@ var Budgie = function () {
       if (this.items.length > this.elementsOnScreen()) {
 
         this.interval = setInterval(function () {
-          var scrollDirection = _this5.scrollProperty();
+          var scrollDirection = _this7.scrollProperty();
 
           currentScroll = scrollContainer[scrollDirection];
 
-          _this5.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
+          _this7.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
 
           scrollContainer[scrollDirection] = currentScroll;
         }, 1000 / fps);
@@ -473,7 +629,8 @@ var Budgie = function () {
       if (this.isNew) {
         this.setupContainer();
         this.insertItems();
-        this.appendExtraItems();
+        this.appendEndingItems();
+        this.prependStartingItems();
         this.setupScrollProperties();
       }
       if (this.options.autoScroll) {
@@ -554,22 +711,6 @@ var Budgie = function () {
         default:
           throw new Error("The selector must be a class or id, prepended by the identifier ('.'/'#')");
       }
-    }
-  }, {
-    key: 'createElementForItem',
-    value: function createElementForItem(item, id, budgieId) {
-      var e = document.createElement('div');
-
-      if (typeof item === 'string') {
-        e.style.backgroundImage = 'url(' + item + ')';
-        e.classList.add('budgie-flex-item-image-' + budgieId);
-      } else {
-        e.appendChild(item);
-      }
-      e.classList.add('budgie-flex-item');
-      e.classList.add('budgie-flex-item-' + budgieId);
-      e.classList.add('budgie-' + budgieId + '-' + id);
-      return e;
     }
   }]);
 
