@@ -78,13 +78,11 @@ var Budgie = function () {
       var self = this;
       var scrollDirection = this.scrollProperty();
 
-      if (this.isNew) {
-        var budgieElement = this.elementMeasurement('budgie-flex-item-' + this.budgieId);
-        var budgieElementMeasure = this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height;
+      var budgieElement = this.elementMeasurement('budgie-flex-item-' + this.budgieId);
+      var budgieElementMeasure = this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height;
 
-        // Set the scroll position to the top of the non-duped elements
-        this.parentContainer[scrollDirection] = budgieElementMeasure;
-      }
+      // Set the scroll position to the top of the non-duped elements
+      this.parentContainer[scrollDirection] = budgieElementMeasure;
 
       this.parentContainer.addEventListener("scroll", function () {
         self.onScroll(scrollDirection);
@@ -113,7 +111,6 @@ var Budgie = function () {
       var height = 100 / this.options.numberHigh;
 
       document.styleSheets[0].insertRule('.budgie-flex-item-' + this.budgieId + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
-      document.styleSheets[0].insertRule('.budgie-flex-item-image-' + this.budgieId + '{background-size: ' + this.options.imageFit + ';}', numOfSheets);
 
       for (var i = numberAcross - 1; i >= 0; i--) {
         document.styleSheets[0].insertRule('.budgie-flex-item-' + this.budgieId + '--filler-' + i + '{width: ' + width * (this.options.numberWide - i) / 2 + '%; height: ' + height * (this.options.numberHigh - i) / 2 + '%; flex-grow: 1;}', numOfSheets);
@@ -629,9 +626,12 @@ var Budgie = function () {
       if (this.isNew) {
         this.setupContainer();
         this.insertItems();
-        this.appendEndingItems();
-        this.prependStartingItems();
-        this.setupScrollProperties();
+        // Only append extra items, and bind the scroll event if this is infinite scroll.
+        if (this.options.infiniteScroll) {
+          this.appendEndingItems();
+          this.prependStartingItems();
+          this.setupScrollProperties();
+        }
       }
       if (this.options.autoScroll) {
         this.startAnimation();
@@ -676,15 +676,12 @@ var Budgie = function () {
       return {
         'numberHigh': 1,
         'numberWide': 1,
-        'noScrollIfNoOverflow': true,
         'direction': 'vertical',
         'secondsOnPage': 1.0,
-        'stopOnHover': false,
         'inverted': false,
         'autoScroll': true,
-        'userNavigation': false,
-        'imageFit': 'cover',
-        'fps': 60
+        'fps': 60,
+        'infiniteScroll': true
       };
     }
 

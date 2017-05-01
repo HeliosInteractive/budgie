@@ -50,15 +50,12 @@ class Budgie {
     return {
       'numberHigh': 1,
       'numberWide': 1,
-      'noScrollIfNoOverflow': true,
       'direction': 'vertical',
       'secondsOnPage': 1.0,
-      'stopOnHover': false,
       'inverted': false,
       'autoScroll': true,
-      'userNavigation': false,
-      'imageFit': 'cover',
-      'fps': 60
+      'fps': 60,
+      'infiniteScroll': true
     };
   }
 
@@ -103,13 +100,11 @@ class Budgie {
     let self = this;
     let scrollDirection = this.scrollProperty();
 
-    if(this.isNew) {
-      let budgieElement = this.elementMeasurement(`budgie-flex-item-${this.budgieId}`)
-      let budgieElementMeasure = this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height
+    let budgieElement = this.elementMeasurement(`budgie-flex-item-${this.budgieId}`)
+    let budgieElementMeasure = this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height
 
-      // Set the scroll position to the top of the non-duped elements
-      this.parentContainer[scrollDirection] = budgieElementMeasure;
-    }
+    // Set the scroll position to the top of the non-duped elements
+    this.parentContainer[scrollDirection] = budgieElementMeasure;
 
     this.parentContainer.addEventListener("scroll", function(){self.onScroll(scrollDirection)});
   }
@@ -134,7 +129,6 @@ class Budgie {
     const height = (100 / this.options.numberHigh);
 
     document.styleSheets[0].insertRule(`.budgie-flex-item-${this.budgieId}{width: ${width}%; height: ${height}%;}`, numOfSheets);
-    document.styleSheets[0].insertRule(`.budgie-flex-item-image-${this.budgieId}{background-size: ${this.options.imageFit};}`, numOfSheets);
 
     for(let i = numberAcross - 1; i >= 0; i--){
       document.styleSheets[0].insertRule(`.budgie-flex-item-${this.budgieId}--filler-${i}{width: ${width*(this.options.numberWide - i)/2}%; height: ${height*(this.options.numberHigh - i)/2}%; flex-grow: 1;}`, numOfSheets);
@@ -595,9 +589,12 @@ class Budgie {
     if(this.isNew){
       this.setupContainer();
       this.insertItems();
-      this.appendEndingItems();
-      this.prependStartingItems();
-      this.setupScrollProperties();
+      // Only append extra items, and bind the scroll event if this is infinite scroll.
+      if(this.options.infiniteScroll){
+        this.appendEndingItems();
+        this.prependStartingItems();
+        this.setupScrollProperties();
+      }
     }
     if(this.options.autoScroll){
       this.startAnimation();
