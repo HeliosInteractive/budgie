@@ -14,8 +14,6 @@
 
 
       <div class="examples-container">
-
-
         <div class="example-container">
           <div class="example-title">
             Horizontal scroll, with autoScroll on.
@@ -27,6 +25,7 @@
           </div>
           <div class="right-column">
             <div class="column-item-content">
+              Horizontal scroll will scroll from right to left.
 <div class="code-block">
   var exampleOne = new Budgie(
     sampleImages,
@@ -58,6 +57,7 @@
           </div>
           <div class="right-column">
             <div class="column-item-content">
+              Inverted horizontal scroll with scroll from left to right.
 <div class="code-block">
   var exampleTwo = new Budgie(
     sampleImages,
@@ -89,6 +89,7 @@
           </div>
           <div class="right-column">
             <div class="column-item-content">
+              Vertical scroll will scroll from top to bottom.
 <div class="code-block">
   var exampleThree = new Budgie(
     sampleImages,
@@ -120,6 +121,7 @@
           </div>
           <div class="right-column">
             <div class="column-item-content">
+              Inverted vertical scroll with scroll from bottom to top.
 <div class="code-block">
   var exampleFour = new Budgie(
     sampleImages,
@@ -139,6 +141,132 @@
             <div class="right-column-backpaper--2"></div>
           </div>
         </div>
+
+        <div class="example-container">
+          <div class="example-title">
+            AutoScroll Off vertical scroll
+          </div>
+          <div class="left-column">
+            <div class="column-item-content">
+              <div id="example-5" class="example-box"></div>
+            </div>
+          </div>
+          <div class="right-column">
+            <div class="column-item-content">
+              With autoScroll off the user will have to scroll the list, via touch and drag, or the mousewheel.
+<div class="code-block">
+  var exampleFive = new Budgie(
+    sampleImages,
+    '#example-5',
+    {
+      'numberHigh': 2,
+      'numberWide': 4,
+      'direction': 'vertical',
+      'autoScroll': false
+    }
+  );
+</div>
+            </div>
+            <div class="right-column-backpaper--1"></div>
+            <div class="right-column-backpaper--2"></div>
+          </div>
+        </div>
+
+        <div class="example-container">
+          <div class="example-title">
+            AutoScroll Off horizontal scroll
+          </div>
+          <div class="left-column">
+            <div class="column-item-content">
+              <div id="example-6" class="example-box"></div>
+            </div>
+          </div>
+          <div class="right-column">
+            <div class="column-item-content">
+              With autoScroll off the user will have to scroll the list, via touch and drag, or the mousewheel.
+<div class="code-block">
+  var exampleSix = new Budgie(
+    sampleImages,
+    '#example-6',
+    {
+      'numberHigh': 1,
+      'numberWide': 4,
+      'direction': 'horizontal',
+      'autoScroll': false
+    }
+  );
+</div>
+            </div>
+            <div class="right-column-backpaper--1"></div>
+            <div class="right-column-backpaper--2"></div>
+          </div>
+        </div>
+
+        <div class="example-container">
+          <div class="example-title">
+            InfiniteScroll Off
+          </div>
+          <div class="left-column">
+            <div class="column-item-content">
+              <div id="example-7" class="example-box"></div>
+            </div>
+          </div>
+          <div class="right-column">
+            <div class="column-item-content">
+              With InfiniteScroll off the list will stop when it reaches the end of the list.
+<div class="code-block">
+  var exampleSeven = new Budgie(
+    sampleImages,
+    '#example-7',
+    {
+      'numberHigh': 1,
+      'numberWide': 5,
+      'direction': 'horizontal',
+      'autoScroll': false,
+      'infiniteScroll': false
+    }
+  );
+</div>
+            </div>
+            <div class="right-column-backpaper--1"></div>
+            <div class="right-column-backpaper--2"></div>
+          </div>
+        </div>
+
+        <div class="example-container">
+          <div class="example-title">
+            Pop demonstration
+          </div>
+          <div class="left-column">
+            <div class="column-item-content">
+              <div id="example-8" class="example-box"></div>
+            </div>
+          </div>
+          <div class="right-column">
+            <div class="column-item-content">
+              <button class="button" onclick="exampleEight.items.pop()">pop</button>  an element off the list and watch Budgie update.
+<div class="code-block">
+  var exampleEight = new Budgie(
+    sampleImages,
+    '#example-8',
+    {
+      'numberHigh': 2,
+      'numberWide': 3,
+      'secondsOnPage': 10.0,
+      'direction': 'horizontal',
+      'autoScroll': true
+    }
+  );
+
+  // Code to pop elements off the list
+  exampleEight.items.pop();
+</div>
+            </div>
+            <div class="right-column-backpaper--1"></div>
+            <div class="right-column-backpaper--2"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -204,6 +332,52 @@
           'secondsOnPage': 15.0,
           'direction': 'vertical',
           'inverted': true,
+          'autoScroll': true
+        }
+      );
+
+      var exampleFive = new Budgie(
+        sampleImages,
+        '#example-5',
+        {
+          'numberHigh': 2,
+          'numberWide': 4,
+          'direction': 'vertical',
+          'autoScroll': false
+        }
+      );
+
+      var exampleSix = new Budgie(
+        sampleImages,
+        '#example-6',
+        {
+          'numberHigh': 1,
+          'numberWide': 4,
+          'direction': 'horizontal',
+          'autoScroll': false
+        }
+      );
+
+      var exampleSeven = new Budgie(
+        sampleImages,
+        '#example-7',
+        {
+          'numberHigh': 1,
+          'numberWide': 5,
+          'direction': 'horizontal',
+          'autoScroll': false,
+          'infiniteScroll': false
+        }
+      );
+
+      var exampleEight = new Budgie(
+        sampleImages,
+        '#example-8',
+        {
+          'numberHigh': 2,
+          'numberWide': 3,
+          'secondsOnPage': 10.0,
+          'direction': 'horizontal',
           'autoScroll': true
         }
       );

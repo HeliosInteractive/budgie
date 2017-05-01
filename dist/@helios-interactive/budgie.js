@@ -1,13 +1,206 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Budgie = function () {
+var imageExtensions = ['jpg', 'gif', 'png'];
+var videoExtensions = ['mp4', 'ogg', 'webm'];
+/**
+ * BudgieDomSetup
+ * This class handles tasks that involve interacting with the DOM at setup
+ */
+var BudgieDom = Object.create({
+  /**
+   * Creates the container inside the passed in element that allows for scrolling
+   * @param budgie
+   * @returns {Element} returns the budgie container
+   */
+  setupBudgieContainer: function setupBudgieContainer(budgie) {
+    budgie.parentContainer.classList.add('budgie-flex-container-parent');
+    budgie.parentContainer.classList.add('budgie-flex-container-parent-' + budgie.budgieId);
 
+    var budgieFlexContainer = document.createElement('div');
+    budgieFlexContainer.classList.add('budgie-flex-container');
+    budgieFlexContainer.classList.add('budgie-container-' + budgie.budgieId);
+    budgie.parentContainer.appendChild(budgieFlexContainer);
+
+    return budgieFlexContainer;
+  },
+
+  /**
+   * Create CSS classes for budgie items
+   * @param budgie
+   */
+  setupBudgieCSS: function setupBudgieCSS(budgie) {
+    // Width of budgie container
+    var eleWidth = parseInt(window.getComputedStyle(budgie.budgieContainer).width);
+
+    var numOfSheets = 0;
+
+    // If there are already cssRules declared, then set the correct number of sheets to allow for addition
+    if (document.styleSheets[0].cssRules) {
+      numOfSheets = document.styleSheets[0].cssRules.length;
+    }
+
+    // Take the larger of the two as the number across
+    var numberAcross = budgie.options.numberHigh >= budgie.options.numberWide ? budgie.options.numberHigh : budgie.options.numberWide;
+
+    // Width in %
+    var width = eleWidth / budgie.options.numberWide / eleWidth * 100;
+    // Height in %
+    var height = 100 / budgie.options.numberHigh;
+
+    // Set the width and height of a single budgie element
+    document.styleSheets[0].insertRule('.budgie-flex-item-' + budgie.budgieId + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
+
+    // Create CSS rules for all possible configurations of filler elements
+    for (var i = numberAcross - 1; i >= 0; i--) {
+      document.styleSheets[0].insertRule('.budgie-flex-item-' + budgie.budgieId + '--filler-' + i + '\n        {\n          width: ' + width * (budgie.options.numberWide - i) / 2 + '%; \n          height: ' + height * (budgie.options.numberHigh - i) / 2 + '%; flex-grow: 1;\n        }', numOfSheets);
+    }
+
+    // Get the flex direction based on the budgie direction
+    var direction = budgie.options.direction === 'horizontal' ? 'column' : 'row';
+    // Set flex direction
+    document.styleSheets[0].insertRule('.budgie-container-' + budgie.budgieId + '{flex-direction: ' + direction + ';}', numOfSheets);
+
+    // Set the overflow properties based on the budgie direction
+    document.styleSheets[0].insertRule('.budgie-flex-container-parent-' + budgie.budgieId + '\n      {\n        overflow-x: ' + (budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden') + '; \n        overflow-y: ' + (budgie.options.direction === 'vertical' ? 'scroll' : 'hidden') + '\n      }', numOfSheets);
+  },
+
+  /**
+   * Sets the scroll properties based on the direction of budgie, and element size
+   * @param budgie
+   */
+  setupBudgieScrollProperties: function setupBudgieScrollProperties(budgie) {
+    // Get the scroll property (scrollTop or scrollLeft)
+    var scrollProperty = budgie.scrollProperty();
+
+    // Get a single budgie element's measure
+    var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + budgie.budgieId);
+
+    // Use width or height based on budgie direction
+    var budgieElementMeasure = budgie.isHorizontal() ? budgieElement.width : budgieElement.height;
+
+    // Set the scroll position to the top of the non-duped elements
+    budgie.parentContainer[scrollProperty] = budgieElementMeasure;
+
+    // Bind an event listener to the scroll event
+    budgie.parentContainer.addEventListener("scroll", function () {
+      budgie.onScroll(scrollProperty);
+    });
+  },
+
+  /**
+   * Inserts the budgie elements. This should only be used during first setup
+   * @param budgie
+   */
+  insertBudgieElements: function insertBudgieElements(budgie) {
+    budgie.items.forEach(function (item, id) {
+      // Add a filler item before the odd ending elements
+      // so that odd ending lists will have a centered ending
+      if (budgie.hasOddEnding() && budgie.items.length - budgie.numberLeftWithOddEnding() === id) {
+        budgie.budgieContainer.appendChild(BudgieDom.createBudgieFillerElement(budgie));
+      }
+
+      // Add the item
+      budgie.budgieContainer.appendChild(BudgieDom.createBudgieElement(budgie, item, id));
+
+      // Add a filler item after the odd ending elements
+      // so that odd ending lists will have a centered ending
+      if (budgie.hasOddEnding() > 0 && budgie.items.length === id + 1) {
+        budgie.budgieContainer.appendChild(BudgieDom.createBudgieFillerElement(budgie));
+      }
+    });
+
+    // If all the elements fit without scrolling, then add an extra div to allow for updates later
+    if (budgie.fitsInContainer()) {
+      var blankEle = document.createElement('div');
+      blankEle.classList.add('budgie-flex-item-' + budgie.budgieId + '--blank');
+      budgie.budgieContainer.appendChild(blankEle);
+    }
+  },
+
+  /**
+   * Creates a filler element with the class based on the number of left over budgie elements
+   * @param budgie
+   * @returns {Element}
+   */
+  createBudgieFillerElement: function createBudgieFillerElement(budgie) {
+    var filler = document.createElement('div');
+    filler.classList.add('budgie-flex-item-' + budgie.budgieId + '--filler');
+    filler.classList.add('budgie-flex-item-' + budgie.budgieId + '--filler-' + budgie.numberLeftWithOddEnding());
+    return filler;
+  },
+
+  /**
+   * Creates a budgie element, and returns that element for use.
+   * @param budgie
+   * @param item
+   * @param itemIndex
+   * @returns {Element}
+   */
+  createBudgieElement: function createBudgieElement(budgie, item, itemIndex) {
+    var element = document.createElement('div');
+
+    element.classList.add('budgie-flex-item');
+    element.classList.add('budgie-flex-item-' + budgie.budgieId);
+    element.classList.add('budgie-' + budgie.budgieId + '-' + itemIndex);
+
+    var innerDiv = BudgieDom.convertItemToElement(item);
+
+    element.innerHTML = innerDiv.outerHTML;
+
+    return element;
+  },
+
+  /**
+   * Will convert an item to a element so that it can be used in a budgie element
+   * @param item
+   * @returns {*}
+   */
+  convertItemToElement: function convertItemToElement(item) {
+    // If the item is a dom element, then return it
+    if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') return item;
+
+    if (typeof item !== 'string') throw new Error('Only DOM Elements and strings are accepted as budgie items');
+
+    var extension = item.match(/\.{1}\w*$/);
+    if (extension) {
+      extension = extension[0].substr(1);
+    }
+
+    var element = void 0;
+    if (imageExtensions.includes(extension)) {
+      element = document.createElement('img');
+      element.src = item;
+    } else if (videoExtensions.includes(extension)) {
+      element = document.createElement('video');
+      element.src = item;
+    }
+
+    if (!element) throw new Error('Extension of: ' + extension + ' is not supported.');
+
+    return element;
+  },
+
+  /**
+   * Returns the height and width measurements of the first element matching the given selector
+   * @param selector
+   * @returns {{}}
+   */
+  measureElementWidthAndHeight: function measureElementWidthAndHeight(selector) {
+    var measure = {};
+    var elementComputedStyle = window.getComputedStyle(document.querySelector(selector));
+    measure.height = parseFloat(elementComputedStyle.height);
+    measure.width = parseFloat(elementComputedStyle.width);
+    return measure;
+  }
+});;'use strict';
+
+var Budgie = function () {
   /**
    *
    * @param items
@@ -19,13 +212,16 @@ var Budgie = function () {
 
     _classCallCheck(this, Budgie);
 
-    this.selector = selector;
+    // Set the parentContainer to be accessable
+    this.parentContainer = document.querySelector(selector);
+    // Apply user options over the default options
     this.options = Object.assign(this.constructor.defaultOptions(), options);
-
-    this.isNew = true;
+    // Sets a random ID to allow for multiple budgies at once
     this.budgieId = Math.floor((1 + Math.random()) * 0x10000);
+    // save a reference to the items array
     this.items = items;
 
+    // Provide methods for manipulating the items array
     var self = this;
     this.items.pop = function () {
       var a = Array.prototype.pop.apply(self.items, arguments);
@@ -53,110 +249,186 @@ var Budgie = function () {
       return a;
     };
 
-    this.start();
+    // Gets the budgie scroller setup for use
+    this.budgieSetup();
+
+    // Will start the scrolling animation if autoStart is true
+    if (this.options.autoStart) {
+      this.budgieAnimate();
+    }
   }
 
+  /**
+   * Default budgie options are defined here
+   * @returns {{numberHigh: number, numberWide: number, direction: string, secondsOnPage: number, inverted: boolean, autoScroll: boolean, fps: number, infiniteScroll: boolean, autoStart: boolean}}
+   */
+
+
   _createClass(Budgie, [{
-    key: 'setupContainer',
-    value: function setupContainer() {
-      var parentContainer = this.constructor.getElement(this.selector);
-      parentContainer.classList.add('budgie-flex-container-parent');
-      parentContainer.classList.add('budgie-flex-container-parent-' + this.budgieId);
-      this.parentContainer = parentContainer;
+    key: 'isVertical',
 
-      var budgieFlexContainer = document.createElement('div');
-      budgieFlexContainer.classList.add('budgie-flex-container');
-      budgieFlexContainer.classList.add('budgie-container-' + this.budgieId);
-      parentContainer.appendChild(budgieFlexContainer);
-      this.setCSS(budgieFlexContainer);
 
-      this.container = budgieFlexContainer;
+    /**
+     * Will return true if budgie has vertical direction
+     * @returns {boolean}
+     */
+    value: function isVertical() {
+      return this.options.direction === 'vertical';
     }
+
+    /**
+     * Will return true if budgie has horizontal direction
+     * @returns {boolean}
+     */
+
   }, {
-    key: 'setupScrollProperties',
-    value: function setupScrollProperties() {
-      var self = this;
-      var scrollDirection = this.scrollProperty();
-
-      if (this.isNew) {
-        var budgieElement = this.elementMeasurement('budgie-flex-item-' + this.budgieId);
-        var budgieElementMeasure = this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height;
-
-        // Set the scroll position to the top of the non-duped elements
-        this.parentContainer[scrollDirection] = budgieElementMeasure;
-      }
-
-      this.parentContainer.addEventListener("scroll", function () {
-        self.onScroll(scrollDirection);
-      });
+    key: 'isHorizontal',
+    value: function isHorizontal() {
+      return this.options.direction === 'horizontal';
     }
+
+    /**
+     * Will be true if the last column/row is not completely full
+     * @returns {boolean}
+     */
+
+  }, {
+    key: 'hasOddEnding',
+    value: function hasOddEnding() {
+      return this.numberLeftWithOddEnding() > 0;
+    }
+
+    /**
+     * Will return the number of elements that can fit in the budgie container
+     * @returns {number}
+     */
+
+  }, {
+    key: 'elementsOnScreen',
+    value: function elementsOnScreen() {
+      return parseInt(this.options.numberHigh) * parseInt(this.options.numberWide);
+    }
+
+    /**
+     * Will be true if all budgie elements fit into container without scrolling
+     * @returns {boolean}
+     */
+
+  }, {
+    key: 'fitsInContainer',
+    value: function fitsInContainer() {
+      return this.items.length <= this.elementsOnScreen();
+    }
+
+    /**
+     * Will return the number of elements left on the last line.
+     * Will return 0 if the last line is full
+     * @returns {number}
+     */
+
   }, {
     key: 'numberLeftWithOddEnding',
     value: function numberLeftWithOddEnding() {
       var numberAcross = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
       return this.items.length % numberAcross;
     }
+
+    /**
+     * Will return the scroll property ('scrollTop' or 'scrollLeft') of the budgie instance
+     * @returns {String} The scroll property ('scrollTop' or 'scrollLeft') of the budgie instance
+     */
+
   }, {
-    key: 'setCSS',
-    value: function setCSS(container) {
-      var eleWidth = parseInt(window.getComputedStyle(container).width);
-      var numOfSheets = 0;
-      if (document.styleSheets[0].cssRules) {
-        numOfSheets = document.styleSheets[0].cssRules.length;
-      }
-
-      // Take the larger of the two
-      var numberAcross = this.options.numberHigh >= this.options.numberWide ? this.options.numberHigh : this.options.numberWide;
-
-      // Width in %
-      var width = eleWidth / this.options.numberWide / eleWidth * 100;
-      var height = 100 / this.options.numberHigh;
-
-      document.styleSheets[0].insertRule('.budgie-flex-item-' + this.budgieId + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
-      document.styleSheets[0].insertRule('.budgie-flex-item-image-' + this.budgieId + '{background-size: ' + this.options.imageFit + ';}', numOfSheets);
-
-      for (var i = numberAcross - 1; i >= 0; i--) {
-        document.styleSheets[0].insertRule('.budgie-flex-item-' + this.budgieId + '--filler-' + i + '{width: ' + width * (this.options.numberWide - i) / 2 + '%; height: ' + height * (this.options.numberHigh - i) / 2 + '%; flex-grow: 1;}', numOfSheets);
-      }
-
-      var direction = this.options.direction === 'horizontal' ? 'column' : 'row';
-      document.styleSheets[0].insertRule('.budgie-container-' + this.budgieId + '{flex-direction: ' + direction + ';}', numOfSheets);
-
-      document.styleSheets[0].insertRule('.budgie-flex-container-parent-' + this.budgieId + '{overflow-x: ' + (this.options.direction === 'horizontal' ? 'scroll' : 'hidden') + '; overflow-y: ' + (this.options.direction === 'vertical' ? 'scroll' : 'hidden') + '}', numOfSheets);
-    }
-  }, {
-    key: 'insertItems',
-    value: function insertItems() {
-      var _this = this;
-
-      this.items.forEach(function (item, id) {
-        // Add a filler item so that odd ending lists will have a centered ending
-        if (_this.numberLeftWithOddEnding() > 0 && _this.items.length - _this.numberLeftWithOddEnding() === id) {
-          _this.container.appendChild(_this.newFillerItem());
-        }
-
-        // Add the item
-        _this.container.appendChild(_this.createBudgieDiv(item, id));
-
-        // Add a filler item so that odd ending lists will have a centered ending
-        if (_this.numberLeftWithOddEnding() > 0 && _this.items.length === id + 1) {
-          _this.container.appendChild(_this.newFillerItem());
-        }
-      });
-      if (this.items.length < this.elementsOnScreen()) {
-        // Append an extra div so that new items can be added
-        var blankEle = document.createElement('div');
-        blankEle.classList.add('budgie-flex-item-' + this.budgieId + '--blank');
-        this.container.appendChild(blankEle);
+    key: 'scrollProperty',
+    value: function scrollProperty() {
+      if (this.isVertical()) {
+        return 'scrollTop';
+      } else if (this.isHorizontal()) {
+        return 'scrollLeft';
       }
     }
+
+    /**
+     * Returns the height and width measurements of the elements associated with the given selector
+     * @param selector
+     * @returns {{}} The height and width measurements of the element associated with the given selector.
+     */
+
   }, {
-    key: 'newFillerItem',
-    value: function newFillerItem() {
-      var filler = document.createElement('div');
-      filler.classList.add('budgie-flex-item-' + this.budgieId + '--filler');
-      filler.classList.add('budgie-flex-item-' + this.budgieId + '--filler-' + this.numberLeftWithOddEnding());
-      return filler;
+    key: 'elementMeasurement',
+    value: function elementMeasurement(selector) {
+      var measure = {};
+      measure.height = parseFloat(window.getComputedStyle(document.getElementsByClassName(selector)[0]).height);
+      measure.width = parseFloat(window.getComputedStyle(document.getElementsByClassName(selector)[0]).width);
+      return measure;
+    }
+
+    /**
+     * Returns the size of the scroll container for this budgie instance
+     * @returns {number} Measurement in px.
+     */
+
+  }, {
+    key: 'scrollSizeMeasurement',
+    value: function scrollSizeMeasurement() {
+      switch (this.options.direction) {
+        case 'vertical':
+          return BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + this.budgieId).height * Math.ceil(this.items.length / this.options.numberWide);
+          break;
+        case 'horizontal':
+          return BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + this.budgieId).width * Math.ceil(this.items.length / this.options.numberHigh);
+          break;
+      }
+    }
+
+    /**
+     * Updates the budgie instance based on array changes
+     */
+
+  }, {
+    key: 'pushItem',
+    value: function pushItem() {
+      this.addLastItem();
+      this.updateBeginningAndEndingItems('add');
+      this.budgieAnimate();
+    }
+
+    /**
+     * Updates the budgie instance based on array changes
+     */
+
+  }, {
+    key: 'popItem',
+    value: function popItem() {
+      this.removeLastItem();
+      this.updateBeginningAndEndingItems('remove');
+      this.budgieAnimate();
+    }
+
+    /**
+     * Updates the budgie instance based on array changes
+     */
+
+  }, {
+    key: 'shiftItem',
+    value: function shiftItem() {
+      this.updateExistingItems();
+      this.removeLastItem();
+      this.updateBeginningAndEndingItems('remove');
+      this.budgieAnimate();
+    }
+
+    /**
+     * Updates the budgie instance based on array changes
+     */
+
+  }, {
+    key: 'unshiftItem',
+    value: function unshiftItem() {
+      this.updateExistingItems();
+      this.addLastItem();
+      this.updateBeginningAndEndingItems('add');
+      this.budgieAnimate();
     }
 
     /**
@@ -166,7 +438,7 @@ var Budgie = function () {
   }, {
     key: 'prependStartingItems',
     value: function prependStartingItems() {
-      var _this2 = this;
+      var _this = this;
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
@@ -178,17 +450,17 @@ var Budgie = function () {
         if (this.numberLeftWithOddEnding() > 0) {
           // The column or row is NOT full, fillers are needed
           // Add a filler item so that odd ending lists will have a centered ending
-          this.container.insertAdjacentElement('afterbegin', this.newFillerItem());
+          this.budgieContainer.insertAdjacentElement('afterbegin', BudgieDom.createBudgieFillerElement(this));
 
           // Add the duplicated elements
           realElements.slice(realElements.length - this.numberLeftWithOddEnding(), realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
-            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
-            _this2.container.insertAdjacentElement('afterbegin', ele);
+            ele.classList.add('budgie-flex-item-' + _this.budgieId + '--duplicate');
+            _this.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
 
           // Add a filler item so that odd ending lists will have a centered ending
-          this.container.insertAdjacentElement('afterbegin', this.newFillerItem());
+          this.budgieContainer.insertAdjacentElement('afterbegin', BudgieDom.createBudgieFillerElement(this));
         } else {
           // The column or row is full, not fillers needed
           var elementsToDupe = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
@@ -196,8 +468,8 @@ var Budgie = function () {
           // Add the duplicated elements
           realElements.slice(realElements.length - elementsToDupe, realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
-            ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
-            _this2.container.insertAdjacentElement('afterbegin', ele);
+            ele.classList.add('budgie-flex-item-' + _this.budgieId + '--duplicate');
+            _this.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
         }
       }
@@ -210,7 +482,7 @@ var Budgie = function () {
   }, {
     key: 'appendEndingItems',
     value: function appendEndingItems() {
-      var _this3 = this;
+      var _this2 = this;
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
@@ -221,47 +493,17 @@ var Budgie = function () {
         // Appends duplicate items equal to the number of elementsOnScreen
         realElements.slice(0, elementsOnScreen).forEach(function (element) {
           var ele = element.cloneNode(true);
-          ele.classList.add('budgie-flex-item-' + _this3.budgieId + '--duplicate');
-          ele.classList.add('budgie-flex-item-' + _this3.budgieId + '--duplicate-ending');
-          _this3.container.insertAdjacentElement('beforeend', ele);
+          ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
+          ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate-ending');
+          _this2.budgieContainer.insertAdjacentElement('beforeend', ele);
         });
       }
     }
-  }, {
-    key: 'elementsOnScreen',
-    value: function elementsOnScreen() {
-      return parseInt(this.options.numberHigh) * parseInt(this.options.numberWide);
-    }
-  }, {
-    key: 'pushItem',
-    value: function pushItem() {
-      this.addLastItem();
-      this.updateBeginningAndEndingItems('add');
-      this.start();
-    }
-  }, {
-    key: 'popItem',
-    value: function popItem() {
-      this.removeLastItem();
-      this.updateBeginningAndEndingItems('remove');
-      this.start();
-    }
-  }, {
-    key: 'shiftItem',
-    value: function shiftItem() {
-      this.updateExistingItems();
-      this.removeLastItem();
-      this.updateBeginningAndEndingItems('remove');
-      this.start();
-    }
-  }, {
-    key: 'unshiftItem',
-    value: function unshiftItem() {
-      this.updateExistingItems();
-      this.addLastItem();
-      this.updateBeginningAndEndingItems('add');
-      this.start();
-    }
+
+    /**
+     * Updates the budgie instance based on array changes
+     */
+
   }, {
     key: 'updateAllElements',
     value: function updateAllElements() {
@@ -278,8 +520,14 @@ var Budgie = function () {
         this.updateBeginningAndEndingItems('remove', true);
       }
       this.updateExistingItems();
-      this.start();
+      this.budgieAnimate();
     }
+
+    /**
+     * Removes an item from the end of the budgie list
+     * @param eleIndex
+     */
+
   }, {
     key: 'removeLastItem',
     value: function removeLastItem() {
@@ -290,6 +538,13 @@ var Budgie = function () {
         element.parentNode.removeChild(element);
       });
     }
+
+    /**
+     * Adds an item to the end of the budgie list
+     * @param itemIndex
+     * @param eleIndex
+     */
+
   }, {
     key: 'addLastItem',
     value: function addLastItem() {
@@ -301,7 +556,7 @@ var Budgie = function () {
       if (!elements.length > 0) {
         elements = document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank');
       }
-      var newElement = this.createBudgieDiv(this.items[itemIndex], itemIndex);
+      var newElement = BudgieDom.createBudgieElement(this, this.items[itemIndex], itemIndex);
       // Insert at the end of the main list
       // We use index of 1, because the last few items are duplicated at the top
       var index = 0;
@@ -309,51 +564,6 @@ var Budgie = function () {
         index = 1;
       }
       elements[index].parentNode.insertBefore(newElement, elements[index].nextSibling);
-    }
-  }, {
-    key: 'createBudgieDiv',
-    value: function createBudgieDiv(item, itemIndex) {
-      var element = document.createElement('div');
-
-      element.classList.add('budgie-flex-item');
-      element.classList.add('budgie-flex-item-' + this.budgieId);
-      element.classList.add('budgie-' + this.budgieId + '-' + itemIndex);
-
-      var innerDiv = this.createItemAsElement(item);
-
-      element.innerHTML = innerDiv.outerHTML;
-
-      return element;
-    }
-  }, {
-    key: 'createItemAsElement',
-    value: function createItemAsElement(item, itemIndex) {
-      // If the item is a dom element, then return it
-      if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') return item;
-
-      if (typeof item !== 'string') throw new Error('Only DOM Elements and strings are accepted as budgie items');
-
-      var extension = item.match(/\.{1}\w*$/);
-      if (extension) {
-        extension = extension[0].substr(1);
-      }
-
-      var imageExtensions = ['jpg', 'gif', 'png'];
-      var videoExtensions = ['mp4', 'ogg', 'webm'];
-
-      console.log(item, extension);
-      var element = void 0;
-      if (imageExtensions.includes(extension)) {
-        element = document.createElement('img');
-        element.src = item;
-      } else if (videoExtensions.includes(extension)) {
-        element = document.createElement('video');
-        element.src = item;
-      }
-
-      if (!element) throw new Error('Extension of: ' + extension + ' is not supported.');
-
-      return element;
     }
 
     /**
@@ -363,28 +573,39 @@ var Budgie = function () {
   }, {
     key: 'updateExistingItems',
     value: function updateExistingItems() {
-      var _this4 = this;
+      var _this3 = this;
 
       this.items.forEach(function (item, index) {
-        Array.from(document.getElementsByClassName('budgie-' + _this4.budgieId + '-' + index)).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-' + _this3.budgieId + '-' + index)).forEach(function (element) {
           // If the element has changed then update, otherwise do nothing
-          var newElement = _this4.createItemAsElement(item).outerHTML;
+          var newElement = BudgieDom.createBudgieElement(item).outerHTML;
           if (element.innerHTML !== newElement) {
             element.innerHTML = newElement;
           }
         });
       });
     }
+
+    /**
+     * Calls both updateListStart and updateListEnding in the correct order
+     * @param method
+     */
+
   }, {
     key: 'updateBeginningAndEndingItems',
     value: function updateBeginningAndEndingItems(method) {
       this.updateListStart();
       this.updateListEnding(method);
     }
+
+    /**
+     * Updates the duplicated elements that come before the real budgie elements
+     */
+
   }, {
     key: 'updateListStart',
     value: function updateListStart() {
-      var _this5 = this;
+      var _this4 = this;
 
       var numberAtTop = void 0;
       if (this.numberLeftWithOddEnding() > 0) {
@@ -426,7 +647,7 @@ var Budgie = function () {
       // Update the existing elements, and add new if needed
       lastRowOfRealElements.forEach(function (element, index) {
         var ele = element.cloneNode(true);
-        ele.classList.add('budgie-flex-item-' + _this5.budgieId + '--duplicate');
+        ele.classList.add('budgie-flex-item-' + _this4.budgieId + '--duplicate');
         if (topOfDupedElements[index]) {
           console.log('replacing existing');
           topOfDupedElements[index].outerHTML = ele.outerHTML;
@@ -446,7 +667,7 @@ var Budgie = function () {
   }, {
     key: 'updateListEnding',
     value: function updateListEnding(method) {
-      var _this6 = this;
+      var _this5 = this;
 
       var redraw = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
@@ -470,15 +691,15 @@ var Budgie = function () {
           var firstElements = Array.from(document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - this.numberLeftWithOddEnding())));
           // Put fill around all elements that need it. At the top, and the bottom.
           lastElements.forEach(function (lastElement) {
-            lastElement.parentNode.insertBefore(_this6.newFillerItem(), lastElement.nextSibling);
+            lastElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(_this5), lastElement.nextSibling);
           });
           firstElements.forEach(function (firstElement) {
-            firstElement.parentNode.insertBefore(_this6.newFillerItem(), firstElement);
+            firstElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(_this5), firstElement);
           });
         } else {
           Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
-            element.classList.remove('budgie-flex-item-' + _this6.budgieId + '--filler-' + (_this6.numberLeftWithOddEnding() + operator));
-            element.classList.add('budgie-flex-item-' + _this6.budgieId + '--filler-' + _this6.numberLeftWithOddEnding());
+            element.classList.remove('budgie-flex-item-' + _this5.budgieId + '--filler-' + (_this5.numberLeftWithOddEnding() + operator));
+            element.classList.add('budgie-flex-item-' + _this5.budgieId + '--filler-' + _this5.numberLeftWithOddEnding());
           });
         }
       } else {
@@ -496,7 +717,7 @@ var Budgie = function () {
         if (document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank').length === 0) {
           var blankEle = document.createElement('div');
           blankEle.classList.add('budgie-flex-item-' + this.budgieId + '--blank');
-          this.container.appendChild(blankEle);
+          this.budgieContainer.appendChild(blankEle);
         }
       }
 
@@ -510,39 +731,6 @@ var Budgie = function () {
     }
 
     /**
-     * Returns the height and width measurements of the elements associated with the given selector
-     * @param selector
-     * @returns {{}} The height and width measurements of the element associated with the given selector.
-     */
-
-  }, {
-    key: 'elementMeasurement',
-    value: function elementMeasurement(selector) {
-      var measure = {};
-      measure.height = parseFloat(window.getComputedStyle(document.getElementsByClassName(selector)[0]).height);
-      measure.width = parseFloat(window.getComputedStyle(document.getElementsByClassName(selector)[0]).width);
-      return measure;
-    }
-
-    /**
-     * Returns the size of the scroll container for this budgie instance
-     * @returns {number} Measurement in px.
-     */
-
-  }, {
-    key: 'scrollSizeMeasurement',
-    value: function scrollSizeMeasurement() {
-      switch (this.options.direction) {
-        case 'vertical':
-          return this.elementMeasurement('budgie-flex-item-' + this.budgieId).height * Math.ceil(this.items.length / this.options.numberWide);
-          break;
-        case 'horizontal':
-          return this.elementMeasurement('budgie-flex-item-' + this.budgieId).width * Math.ceil(this.items.length / this.options.numberHigh);
-          break;
-      }
-    }
-
-    /**
     * Will reset the budgie elements scrollProperty if it hits a wrap point.
     * @param {string} scrollDirection - The scroll direction of the given budgie instance.
     *   can be 'scrollTop' or 'scrollLeft'
@@ -552,30 +740,37 @@ var Budgie = function () {
   }, {
     key: 'onScroll',
     value: function onScroll(scrollDirection) {
-      var scrollContainerSize = this.scrollSizeMeasurement();
+      if (!this.scrollContainerSize) {
+        this.scrollContainerSize = this.scrollSizeMeasurement();
+      }
 
-      var budgieElement = this.elementMeasurement('budgie-flex-item-' + this.budgieId);
-      var budgieElementMeasure = Math.floor(this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height);
+      if (!this.budgieElementMeasurement) {
+        var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + this.budgieId);
+        this.budgieElementMeasurement = Math.floor(this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height);
+      }
 
-      if (this.parentContainer[scrollDirection] >= scrollContainerSize + budgieElementMeasure) {
-        this.parentContainer[scrollDirection] = budgieElementMeasure;
+      if (this.parentContainer[scrollDirection] >= this.scrollContainerSize + this.budgieElementMeasurement) {
+        this.parentContainer[scrollDirection] = this.budgieElementMeasurement;
       } else if (this.parentContainer[scrollDirection] <= 0) {
-        this.parentContainer[scrollDirection] = scrollContainerSize;
+        this.parentContainer[scrollDirection] = this.scrollContainerSize;
       }
     }
 
     /**
-     * Will return the scroll property ('scrollTop' or 'scrollLeft') of the budgie instance
-     * @returns {String} The scroll property ('scrollTop' or 'scrollLeft') of the budgie instance
+     * Sets up the budgie scroller to be ready for use
      */
 
   }, {
-    key: 'scrollProperty',
-    value: function scrollProperty() {
-      if (this.options.direction === 'vertical') {
-        return 'scrollTop';
-      } else if (this.options.direction === 'horizontal') {
-        return 'scrollLeft';
+    key: 'budgieSetup',
+    value: function budgieSetup() {
+      this.budgieContainer = BudgieDom.setupBudgieContainer(this);
+      BudgieDom.setupBudgieCSS(this);
+      BudgieDom.insertBudgieElements(this);
+      // Only append extra items, and bind the scroll event if this is infinite scroll.
+      if (this.options.infiniteScroll) {
+        this.appendEndingItems();
+        this.prependStartingItems();
+        BudgieDom.setupBudgieScrollProperties(this);
       }
     }
 
@@ -584,91 +779,89 @@ var Budgie = function () {
      */
 
   }, {
-    key: 'startAnimation',
-    value: function startAnimation() {
-      var _this7 = this;
+    key: 'budgieAnimate',
+    value: function budgieAnimate() {
+      var _this6 = this;
 
+      // Will not animate if autoScroll is off
+      if (!this.options.autoScroll) {
+        return;
+      }
+
+      // How many times the animation should run per second
       var fps = this.options.fps;
 
+      // Will be either scrollTop or scrollLeft
       var scrollDirection = this.scrollProperty();
 
-      var scrollContainer = this.container.parentElement;
+      // The current value of the scrollDirection
       var currentScroll = void 0;
 
-      var measure = this.elementMeasurement('budgie-container-' + this.budgieId);
-      var viewMeasure = this.options.direction === "horizontal" ? measure.width : measure.height;
-      // This needs to be a whole number, so always round up
+      // The measurement of the budgie container
+      var budgieContainerMeasurements = BudgieDom.measureElementWidthAndHeight('.budgie-container-' + this.budgieId);
+
+      // The axis measurement based on the direction
+      var viewMeasure = this.isHorizontal() ? budgieContainerMeasurements.width : budgieContainerMeasurements.height;
+
+      // Calculate scrollspeed, this will dictate how far the budgie scroller moves with each frame
+      // This must be a whole number > 0 so we round up.
       var scrollSpeed = Math.ceil(viewMeasure / this.options.secondsOnPage / fps);
 
-      // always clear interval to ensure that only one scroller is running
-      this.stop();
-      if (this.items.length > this.elementsOnScreen()) {
+      // Clear out any existing animations, which allows for use of this on redraws
+      this.stopAnimate();
 
+      // Only animate if the elements do not all fit in the container
+      if (!this.fitsInContainer()) {
         this.interval = setInterval(function () {
-          var scrollDirection = _this7.scrollProperty();
+          // Get the current value of the scroll
+          currentScroll = _this6.budgieContainer.parentElement[scrollDirection];
 
-          currentScroll = scrollContainer[scrollDirection];
+          // Add or subtract from the current value based on inverted or not
+          _this6.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
 
-          _this7.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
-
-          scrollContainer[scrollDirection] = currentScroll;
+          // Apply the new scroll value
+          _this6.budgieContainer.parentElement[scrollDirection] = currentScroll;
         }, 1000 / fps);
       } else {
-        scrollContainer[scrollDirection] = 0;
+        // Set the scroll property to 0 if all elements fit in the container
+        // This is used when animate is called on a redraw
+        this.budgieContainer.parentElement[scrollDirection] = 0;
       }
     }
 
-    //////////////
-    // Public methods for using the scroller
-    //////////////
-    // start the infinite scroll
+    /**
+     * Will toggle the inverted property of the Budgie element
+     */
 
   }, {
-    key: 'start',
-    value: function start() {
-      if (this.isNew) {
-        this.setupContainer();
-        this.insertItems();
-        this.appendEndingItems();
-        this.prependStartingItems();
-        this.setupScrollProperties();
-      }
-      if (this.options.autoScroll) {
-        this.startAnimation();
-      }
-      this.isNew = false;
+    key: 'changeInversion',
+    value: function changeInversion() {
+      this.options.inverted = !this.options.inverted;
     }
 
-    // stop the infinite scroll
+    /**
+     * Clears the interval that controls the scrolling
+     * @returns {boolean}
+     */
 
   }, {
-    key: 'stop',
-    value: function stop() {
+    key: 'stopAnimate',
+    value: function stopAnimate() {
       if (!this.interval) return false;
       window.clearInterval(this.interval);
       return true;
     }
 
     /**
-     *
+     * Removes the Budgie element from the DOM
      */
 
   }, {
-    key: 'remove',
-    value: function remove() {
-      this.stop();
-      this.container.parentElement.classList.remove('budgie-flex-container-parent-' + this.budgieId);
-      this.container.parentElement.removeChild(this.container);
-    }
-
-    /*
-    * Changes the inversion of the budgie instance.
-    * */
-
-  }, {
-    key: 'changeInversion',
-    value: function changeInversion() {
-      this.options.inverted = !this.options.inverted;
+    key: 'removeBudgie',
+    value: function removeBudgie() {
+      this.stopAnimate();
+      this.budgieContainer.parentElement.classList.remove('budgie-flex-container-parent-' + this.budgieId);
+      this.budgieContainer.parentElement.removeChild(this.budgieContainer);
     }
   }], [{
     key: 'defaultOptions',
@@ -676,46 +869,22 @@ var Budgie = function () {
       return {
         'numberHigh': 1,
         'numberWide': 1,
-        'noScrollIfNoOverflow': true,
         'direction': 'vertical',
         'secondsOnPage': 1.0,
-        'stopOnHover': false,
         'inverted': false,
         'autoScroll': true,
-        'userNavigation': false,
-        'imageFit': 'cover',
-        'fps': 60
+        'fps': 60,
+        'infiniteScroll': true,
+        'autoStart': true
       };
-    }
-
-    /**
-     *
-     * @param selector either an id, class, or DOM element
-     * @returns {{}} returns the DOM element that matches the selector
-     */
-
-  }, {
-    key: 'getElement',
-    value: function getElement(selector) {
-      // allow dom elements to get passed in directly
-      if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object') return selector;
-
-      var splitSelector = selector.substring(0, 1);
-      switch (splitSelector) {
-        case '.':
-          return document.getElementsByClassName(selector.substring(1))[0];
-          break;
-        case '#':
-          return document.getElementById(selector.substring(1));
-          break;
-        default:
-          throw new Error("The selector must be a class or id, prepended by the identifier ('.'/'#')");
-      }
     }
   }]);
 
   return Budgie;
 }();
+
+// Set Budgie as a global variable for use
+
 
 if (typeof global !== 'undefined') global.Budgie = Budgie;
 //# sourceMappingURL=budgie.js.map
