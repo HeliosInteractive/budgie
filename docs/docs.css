@@ -110,6 +110,7 @@ body {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
+  font-weight: bold;
 }
 
 .code-block {
@@ -119,6 +120,7 @@ body {
   background-color: var(--medium-grey);
   font-family: 'PT Mono', monospace;
   font-size: 0.8em;
+  font-weight: normal;
   border: 1px dashed;
   padding: 0.5em;
   margin: 0.5em 0;
@@ -127,4 +129,9 @@ body {
 .example-box {
   height: 25vh;
   width: 100%;
+}
+
+.button {
+  background-color: var(--medium-grey);
+  margin: 0 4px;
 }
