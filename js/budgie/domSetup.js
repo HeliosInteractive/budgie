@@ -175,6 +175,7 @@ const BudgieDom = Object.create({
    */
   convertItemToElement : (item) => {
     // If the item is a dom element, then return it
+    console.log(item)
     if(typeof item === 'object' ) return item;
 
     if(typeof item !== 'string') throw new Error('Only DOM Elements and strings are accepted as budgie items')

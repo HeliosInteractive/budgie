@@ -123,6 +123,14 @@ class Budgie {
   }
 
   /**
+   * Clears out measurements so that they will be remeasured
+   */
+  clearMeasurements(){
+    this.budgieElementMeasurement = undefined;
+    this.scrollContainerSize = undefined;
+  }
+
+  /**
    * Will return the scroll property ('scrollTop' or 'scrollLeft') of the budgie instance
    * @returns {String} The scroll property ('scrollTop' or 'scrollLeft') of the budgie instance
    */
@@ -167,6 +175,7 @@ class Budgie {
   pushItem(){
     this.addLastItem();
     this.updateBeginningAndEndingItems('add');
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -176,6 +185,7 @@ class Budgie {
   popItem(){
     this.removeLastItem();
     this.updateBeginningAndEndingItems('remove');
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -186,6 +196,7 @@ class Budgie {
     this.updateExistingItems()
     this.removeLastItem();
     this.updateBeginningAndEndingItems('remove');
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -196,6 +207,28 @@ class Budgie {
     this.updateExistingItems()
     this.addLastItem();
     this.updateBeginningAndEndingItems('add');
+    this.clearMeasurements();
+    this.budgieAnimate();
+  }
+
+  /**
+   * Updates the budgie instance based on array changes
+   */
+  updateAllElements(){
+    let elementCount = document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`).length
+    if(this.items.length > elementCount){
+      for(let i = elementCount; i < this.items.length; i++){
+        this.addLastItem(i, i - 1);
+      }
+      this.updateBeginningAndEndingItems('add', true);
+    } else if (this.items.length < elementCount) {
+      for(let i = elementCount; i > this.items.length; i--){
+        this.removeLastItem(i-1);
+      }
+      this.updateBeginningAndEndingItems('remove', true);
+    }
+    this.updateExistingItems();
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -273,26 +306,6 @@ class Budgie {
   }
 
   /**
-   * Updates the budgie instance based on array changes
-   */
-  updateAllElements(){
-    let elementCount = document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`).length
-    if(this.items.length > elementCount){
-      for(let i = elementCount; i < this.items.length; i++){
-        this.addLastItem(i, i - 1);
-      }
-      this.updateBeginningAndEndingItems('add', true);
-    } else if (this.items.length < elementCount) {
-      for(let i = elementCount; i > this.items.length; i--){
-        this.removeLastItem(i-1);
-      }
-      this.updateBeginningAndEndingItems('remove', true);
-    }
-    this.updateExistingItems();
-    this.budgieAnimate();
-  }
-
-  /**
    * Removes an item from the end of the budgie list
    * @param eleIndex
    */
@@ -314,6 +327,7 @@ class Budgie {
     if(!elements.length > 0){
       elements = document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--blank`)
     }
+    console.log(this.items[itemIndex], itemIndex)
     let newElement = BudgieDom.createBudgieElement(this, this.items[itemIndex], itemIndex);
     // Insert at the end of the main list
     // We use index of 1, because the last few items are duplicated at the top
@@ -329,9 +343,10 @@ class Budgie {
     this.items.forEach((item, index) => {
       Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${index}`)).forEach((element) => {
         // If the element has changed then update, otherwise do nothing
-        let newElement = BudgieDom.createBudgieElement(item).outerHTML;
-        if (element.innerHTML !== newElement) {
-          element.innerHTML = newElement;
+        console.log(item)
+        let newElement = BudgieDom.createBudgieElement(this, item, index).outerHTML;
+        if (element.outerHTML !== newElement) {
+          element.outerHTML = newElement;
         }
       });
     });
@@ -368,15 +383,12 @@ class Budgie {
 
     const firstRealElement = realElements[0];
 
-    console.log('Updating List Start', numberAtTop, lastRowOfRealElements, topOfDupedElements, firstRealElement)
 
     // If there are more existing elements than we need, then trim that list
     if(topOfDupedElements.length > lastRowOfRealElements.length) {
       let numberOff = topOfDupedElements.length - lastRowOfRealElements.length
-      console.log('Need to remove', numberOff)
 
       for(let i = 0; i < numberOff; i += 1) {
-        console.log('removing elements', i, topOfDupedElements[i])
         topOfDupedElements[i].parentNode.removeChild(topOfDupedElements[i]);
         topOfDupedElements.shift();
       }
@@ -390,10 +402,8 @@ class Budgie {
       let ele = element.cloneNode(true);
       ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
       if(topOfDupedElements[index]){
-        console.log('replacing existing')
         topOfDupedElements[index].outerHTML = ele.outerHTML
       } else {
-        console.log('adding new')
         firstRealElement.parentNode.insertBefore(ele, firstRealElement);
       }
     })

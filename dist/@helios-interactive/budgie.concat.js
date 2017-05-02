@@ -175,6 +175,7 @@ const BudgieDom = Object.create({
    */
   convertItemToElement : (item) => {
     // If the item is a dom element, then return it
+    console.log(item)
     if(typeof item === 'object' ) return item;
 
     if(typeof item !== 'string') throw new Error('Only DOM Elements and strings are accepted as budgie items')
@@ -330,8 +331,16 @@ class Budgie {
    * @returns {number}
    */
   numberLeftWithOddEnding(){
-    let numberAcross = (this.options.direction === 'horizontal') ? this.options.numberHigh : this.options.numberWide;
+    let numberAcross = this.isHorizontal() ? this.options.numberHigh : this.options.numberWide;
     return (this.items.length % numberAcross);
+  }
+
+  /**
+   * Clears out measurements so that they will be remeasured
+   */
+  clearMeasurements(){
+    this.budgieElementMeasurement = undefined;
+    this.scrollContainerSize = undefined;
   }
 
   /**
@@ -379,6 +388,7 @@ class Budgie {
   pushItem(){
     this.addLastItem();
     this.updateBeginningAndEndingItems('add');
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -388,6 +398,7 @@ class Budgie {
   popItem(){
     this.removeLastItem();
     this.updateBeginningAndEndingItems('remove');
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -398,6 +409,7 @@ class Budgie {
     this.updateExistingItems()
     this.removeLastItem();
     this.updateBeginningAndEndingItems('remove');
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -408,6 +420,28 @@ class Budgie {
     this.updateExistingItems()
     this.addLastItem();
     this.updateBeginningAndEndingItems('add');
+    this.clearMeasurements();
+    this.budgieAnimate();
+  }
+
+  /**
+   * Updates the budgie instance based on array changes
+   */
+  updateAllElements(){
+    let elementCount = document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`).length
+    if(this.items.length > elementCount){
+      for(let i = elementCount; i < this.items.length; i++){
+        this.addLastItem(i, i - 1);
+      }
+      this.updateBeginningAndEndingItems('add', true);
+    } else if (this.items.length < elementCount) {
+      for(let i = elementCount; i > this.items.length; i--){
+        this.removeLastItem(i-1);
+      }
+      this.updateBeginningAndEndingItems('remove', true);
+    }
+    this.updateExistingItems();
+    this.clearMeasurements();
     this.budgieAnimate();
   }
 
@@ -420,9 +454,9 @@ class Budgie {
     const realElements = Array.from(document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`));
 
     // If the number of elements is greater than the number that fit in the given area
-    if(this.items.length > elementsOnScreen){
+    if(!this.fitsInContainer){
       // Prepends duplicate items equal to the number of elementsOnScreen
-      if(this.numberLeftWithOddEnding() > 0) {
+      if(this.hasOddEnding()) {
         // The column or row is NOT full, fillers are needed
         // Add a filler item so that odd ending lists will have a centered ending
         this.budgieContainer.insertAdjacentElement('afterbegin', BudgieDom.createBudgieFillerElement(this));
@@ -443,7 +477,7 @@ class Budgie {
         this.budgieContainer.insertAdjacentElement('afterbegin', BudgieDom.createBudgieFillerElement(this));
       } else {
         // The column or row is full, not fillers needed
-        let elementsToDupe = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+        let elementsToDupe = this.isHorizontal() ? this.options.numberHigh : this.options.numberWide;
 
         // Add the duplicated elements
         realElements.slice(
@@ -469,7 +503,7 @@ class Budgie {
     const realElements = Array.from(document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`));
 
     // If the number of elements is greater than the number that fit in the given area
-    if(this.items.length > elementsOnScreen){
+    if(!this.fitsInContainer()){
       // Appends duplicate items equal to the number of elementsOnScreen
       realElements.slice(
         0,
@@ -482,26 +516,6 @@ class Budgie {
           this.budgieContainer.insertAdjacentElement('beforeend', ele);
         });
     }
-  }
-
-  /**
-   * Updates the budgie instance based on array changes
-   */
-  updateAllElements(){
-    let elementCount = document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`).length
-    if(this.items.length > elementCount){
-      for(let i = elementCount; i < this.items.length; i++){
-        this.addLastItem(i, i - 1);
-      }
-      this.updateBeginningAndEndingItems('add', true);
-    } else if (this.items.length < elementCount) {
-      for(let i = elementCount; i > this.items.length; i--){
-        this.removeLastItem(i-1);
-      }
-      this.updateBeginningAndEndingItems('remove', true);
-    }
-    this.updateExistingItems();
-    this.budgieAnimate();
   }
 
   /**
@@ -526,6 +540,7 @@ class Budgie {
     if(!elements.length > 0){
       elements = document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--blank`)
     }
+    console.log(this.items[itemIndex], itemIndex)
     let newElement = BudgieDom.createBudgieElement(this, this.items[itemIndex], itemIndex);
     // Insert at the end of the main list
     // We use index of 1, because the last few items are duplicated at the top
@@ -541,9 +556,10 @@ class Budgie {
     this.items.forEach((item, index) => {
       Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${index}`)).forEach((element) => {
         // If the element has changed then update, otherwise do nothing
-        let newElement = BudgieDom.createBudgieElement(item).outerHTML;
-        if (element.innerHTML !== newElement) {
-          element.innerHTML = newElement;
+        console.log(item)
+        let newElement = BudgieDom.createBudgieElement(this, item, index).outerHTML;
+        if (element.outerHTML !== newElement) {
+          element.outerHTML = newElement;
         }
       });
     });
@@ -563,10 +579,10 @@ class Budgie {
    */
   updateListStart() {
     let numberAtTop;
-    if (this.numberLeftWithOddEnding() > 0) {
+    if (this.hasOddEnding()) {
       numberAtTop = this.numberLeftWithOddEnding();
     } else {
-      numberAtTop = this.options.direction === 'horizontal' ? this.options.numberHigh : this.options.numberWide;
+      numberAtTop = this.isHorizontal() ? this.options.numberHigh : this.options.numberWide;
     }
 
     let realElements = Array.from(document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`));
@@ -580,32 +596,27 @@ class Budgie {
 
     const firstRealElement = realElements[0];
 
-    console.log('Updating List Start', numberAtTop, lastRowOfRealElements, topOfDupedElements, firstRealElement)
 
     // If there are more existing elements than we need, then trim that list
     if(topOfDupedElements.length > lastRowOfRealElements.length) {
       let numberOff = topOfDupedElements.length - lastRowOfRealElements.length
-      console.log('Need to remove', numberOff)
 
       for(let i = 0; i < numberOff; i += 1) {
-        console.log('removing elements', i, topOfDupedElements[i])
         topOfDupedElements[i].parentNode.removeChild(topOfDupedElements[i]);
         topOfDupedElements.shift();
       }
     }
 
     // Exit early if the list is not long enough to scroll
-    if(this.items.length <= this.elementsOnScreen()){ return; }
+    if(this.fitsInContainer()){ return; }
 
     // Update the existing elements, and add new if needed
     lastRowOfRealElements.forEach((element, index) => {
       let ele = element.cloneNode(true);
       ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
       if(topOfDupedElements[index]){
-        console.log('replacing existing')
         topOfDupedElements[index].outerHTML = ele.outerHTML
       } else {
-        console.log('adding new')
         firstRealElement.parentNode.insertBefore(ele, firstRealElement);
       }
     })
@@ -631,7 +642,7 @@ class Budgie {
       Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach(element =>
         element.parentNode.removeChild(element));
 
-    if(this.numberLeftWithOddEnding() > 0){
+    if(this.hasOddEnding()){
       if(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`).length === 0) {
         let lastElements = Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${this.items.length - 1}`));
         let firstElements = Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${this.items.length - this.numberLeftWithOddEnding()}`));
@@ -653,7 +664,8 @@ class Budgie {
         element.parentNode.removeChild(element));
     }
 
-    if(this.items.length <= this.elementsOnScreen()) {
+    // If all elements fit in the container and scrolling is not needed
+    if(this.fitsInContainer()) {
       Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--duplicate`)).forEach(element =>
         element.parentNode.removeChild(element));
 
@@ -665,7 +677,7 @@ class Budgie {
       }
     }
 
-    if(this.items.length > this.elementsOnScreen() && document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--duplicate-ending`).length === 0){
+    if(!this.fitsInContainer() && document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--duplicate-ending`).length === 0){
       this.appendEndingItems();
 
       Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--blank`)).forEach(blankEle =>
@@ -686,7 +698,7 @@ class Budgie {
 
     if(!this.budgieElementMeasurement) {
       let budgieElement = BudgieDom.measureElementWidthAndHeight(`.budgie-flex-item-${this.budgieId}`);
-      this.budgieElementMeasurement = Math.floor(this.options.direction === 'horizontal' ? budgieElement.width : budgieElement.height);
+      this.budgieElementMeasurement = Math.floor(this.isHorizontal() ? budgieElement.width : budgieElement.height);
     }
 
     if((this.parentContainer[scrollDirection] >= this.scrollContainerSize + this.budgieElementMeasurement)) {
