@@ -163,7 +163,6 @@ var BudgieDom = Object.create({
    */
   convertItemToElement: function convertItemToElement(item) {
     // If the item is a dom element, then return it
-    console.log(item);
     if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') return item;
 
     if (typeof item !== 'string') throw new Error('Only DOM Elements and strings are accepted as budgie items');
@@ -485,9 +484,11 @@ var Budgie = function () {
       var realElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)'));
 
       // If the number of elements is greater than the number that fit in the given area
-      if (!this.fitsInContainer) {
+      if (!this.fitsInContainer()) {
         // Prepends duplicate items equal to the number of elementsOnScreen
+
         if (this.hasOddEnding()) {
+
           // The column or row is NOT full, fillers are needed
           // Add a filler item so that odd ending lists will have a centered ending
           this.budgieContainer.insertAdjacentElement('afterbegin', BudgieDom.createBudgieFillerElement(this));
@@ -573,7 +574,7 @@ var Budgie = function () {
       if (!elements.length > 0) {
         elements = document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank');
       }
-      console.log(this.items[itemIndex], itemIndex);
+
       var newElement = BudgieDom.createBudgieElement(this, this.items[itemIndex], itemIndex);
       // Insert at the end of the main list
       // We use index of 1, because the last few items are duplicated at the top
@@ -596,10 +597,11 @@ var Budgie = function () {
       this.items.forEach(function (item, index) {
         Array.from(document.getElementsByClassName('budgie-' + _this3.budgieId + '-' + index)).forEach(function (element) {
           // If the element has changed then update, otherwise do nothing
-          console.log(item);
-          var newElement = BudgieDom.createBudgieElement(_this3, item, index).outerHTML;
-          if (element.outerHTML !== newElement) {
-            element.outerHTML = newElement;
+
+          var newElement = BudgieDom.createBudgieElement(_this3, item, index);
+          // update the element if it does not currently match
+          if (element.innerHTML !== newElement.innerHTML) {
+            element.innerHTML = newElement.innerHTML;
           }
         });
       });
@@ -694,9 +696,11 @@ var Budgie = function () {
         throw new Error("Only 'add' and 'remove' are supported arguments");
       }
 
-      if (redraw) Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
-        return element.parentNode.removeChild(element);
-      });
+      if (redraw) {
+        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
+          return element.parentNode.removeChild(element);
+        });
+      }
 
       if (this.hasOddEnding()) {
         if (document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler').length === 0) {
@@ -762,6 +766,8 @@ var Budgie = function () {
         var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + this.budgieId);
         this.budgieElementMeasurement = Math.floor(this.isHorizontal() ? budgieElement.width : budgieElement.height);
       }
+
+      // console.log('scroll at: ' + this.parentContainer[scrollDirection], 'container size: ' + this.scrollContainerSize, 'element size: ' + this.budgieElementMeasurement)
 
       if (this.parentContainer[scrollDirection] >= this.scrollContainerSize + this.budgieElementMeasurement) {
         this.parentContainer[scrollDirection] = this.budgieElementMeasurement;
