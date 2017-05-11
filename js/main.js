@@ -346,9 +346,10 @@ class Budgie {
       Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${index}`)).forEach((element) => {
         // If the element has changed then update, otherwise do nothing
 
-        let newElement = BudgieDom.createBudgieElement(this, item, index).outerHTML;
-        if (element.outerHTML !== newElement) {
-          element.outerHTML = newElement;
+        let newElement = BudgieDom.createBudgieElement(this, item, index);
+        // update the element if it does not currently match
+        if (element.innerHTML !== newElement.innerHTML) {
+          element.innerHTML = newElement.innerHTML;
         }
       });
     });
@@ -384,7 +385,6 @@ class Budgie {
     let lastRowOfRealElements = realElements.slice(realElements.length - numberAtTop, realElements.length);
 
     const firstRealElement = realElements[0];
-
 
     // If there are more existing elements than we need, then trim that list
     if(topOfDupedElements.length > lastRowOfRealElements.length) {
@@ -427,9 +427,10 @@ class Budgie {
       throw new Error("Only 'add' and 'remove' are supported arguments")
     }
 
-    if(redraw)
+    if(redraw){
       Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach(element =>
         element.parentNode.removeChild(element));
+    }
 
     if(this.hasOddEnding()){
       if(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`).length === 0) {
