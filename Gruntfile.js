@@ -53,24 +53,13 @@ module.exports = function(grunt){
     },
 
     watch: {
-      files: ['<%= jshint.files %>','styles/**/*.scss'],
+      files: ['<%= jshint.files %>'],
       tasks: ['build']
     },
 
-    sass: {
-      dist:{
-        options: {
-          style: 'expanded'
-        },
-        files: {
-          'dist/main.css':'styles/main.scss',
-          'docs/budgie.css':'styles/main.scss'
-        }
-      }
-    }
   });
 
   grunt.registerTask('default', ['jshint','build'])
   grunt.registerTask('dev', ['build', 'connect','watch'])
-  grunt.registerTask('build', ['concat', 'babel', 'uglify', 'sass'])
+  grunt.registerTask('build', ['concat', 'babel', 'uglify'])
 }

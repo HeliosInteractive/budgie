@@ -6,6 +6,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var styleBlock = document.createElement('style');
+
+styleBlock.innerHTML = '\n.budgie-flex-container, .budgie-flex-container--vertical, .budgie-flex-container--horizontal {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: center; }\n\n.budgie-flex-item :first-child {\n  max-height: 100%;\n  max-width: 100%; }\n\n.budgie-flex-container-parent {\n  overflow: -moz-scrollbars-none; }\n  .budgie-flex-container-parent::-webkit-scrollbar {\n    display: none; }\n';
+
+document.head.appendChild(styleBlock);;'use strict';
+
 var imageExtensions = ['jpg', 'gif', 'png'];
 var videoExtensions = ['mp4', 'ogg', 'webm'];
 /**
