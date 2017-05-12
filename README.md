@@ -89,8 +89,9 @@ Configuration options are passed on initialization as an options object.
 
 |Method|Arguments|Description|
 |---|---|---|
-|changeInversion||Will toggle the inversion to the opposite of it's current setting|
+|budgieAnimate||Will start Budgie autoscrolling|
 |stopAnimate||Will stop Budgie from autoscrolling|
+|changeInversion||Will toggle the inversion to the opposite of it's current setting|
 |removeBudgie||Will remove the budgie element from the dom. It cannot be added back, and will need replaced with a `new Budgie`|
 
 ### The following array methods will update the Budgie element if executed on the array of items passed to budgie.
@@ -118,3 +119,27 @@ For more support add:
  - [classList pollyfill](https://github.com/eligrey/classList.js)
  - Flexbox pollyfill
  - forEach pollyfill
+ 
+ ## License
+ 
+ MIT License
+ 
+ Copyright (c) [2017] [Adam McFadden]
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
