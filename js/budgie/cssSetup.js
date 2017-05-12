@@ -3,7 +3,7 @@
 let styleBlock = document.createElement('style');
 
 styleBlock.innerHTML = `
-.budgie-flex-container, .budgie-flex-container--vertical, .budgie-flex-container--horizontal {
+.budgie-container {
   width: 100%;
   height: 100%;
   padding: 0;
@@ -13,13 +13,13 @@ styleBlock.innerHTML = `
   align-items: center;
   justify-content: center; }
 
-.budgie-flex-item :first-child {
+.budgie-item :first-child {
   max-height: 100%;
   max-width: 100%; }
 
-.budgie-flex-container-parent {
+.budgie-container-parent {
   overflow: -moz-scrollbars-none; }
-  .budgie-flex-container-parent::-webkit-scrollbar {
+  .budgie-container-parent::-webkit-scrollbar {
     display: none; }
 `;
 

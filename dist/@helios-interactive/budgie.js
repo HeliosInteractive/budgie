@@ -8,11 +8,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var styleBlock = document.createElement('style');
 
-styleBlock.innerHTML = '\n.budgie-flex-container, .budgie-flex-container--vertical, .budgie-flex-container--horizontal {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: center; }\n\n.budgie-flex-item :first-child {\n  max-height: 100%;\n  max-width: 100%; }\n\n.budgie-flex-container-parent {\n  overflow: -moz-scrollbars-none; }\n  .budgie-flex-container-parent::-webkit-scrollbar {\n    display: none; }\n';
+styleBlock.innerHTML = '\n.budgie-container {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: center; }\n\n.budgie-item :first-child {\n  max-height: 100%;\n  max-width: 100%; }\n\n.budgie-container-parent {\n  overflow: -moz-scrollbars-none; }\n  .budgie-container-parent::-webkit-scrollbar {\n    display: none; }\n';
 
 document.head.appendChild(styleBlock);;'use strict';
 
-var imageExtensions = ['jpg', 'gif', 'png'];
+var imageExtensions = ['jpg', 'gif', 'png', 'bmp', 'jpeg'];
 var videoExtensions = ['mp4', 'ogg', 'webm'];
 /**
  * BudgieDomSetup
@@ -25,11 +25,11 @@ var BudgieDom = Object.create({
    * @returns {Element} returns the budgie container
    */
   setupBudgieContainer: function setupBudgieContainer(budgie) {
-    budgie.parentContainer.classList.add('budgie-flex-container-parent');
-    budgie.parentContainer.classList.add('budgie-flex-container-parent-' + budgie.budgieId);
+    budgie.parentContainer.classList.add('budgie-container-parent');
+    budgie.parentContainer.classList.add('budgie-container-parent-' + budgie.budgieId);
 
     var budgieFlexContainer = document.createElement('div');
-    budgieFlexContainer.classList.add('budgie-flex-container');
+    budgieFlexContainer.classList.add('budgie-container');
     budgieFlexContainer.classList.add('budgie-container-' + budgie.budgieId);
     budgie.parentContainer.appendChild(budgieFlexContainer);
 
@@ -60,11 +60,11 @@ var BudgieDom = Object.create({
     var height = 100 / budgie.options.numberHigh;
 
     // Set the width and height of a single budgie element
-    document.styleSheets[0].insertRule('.budgie-flex-item-' + budgie.budgieId + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
+    document.styleSheets[0].insertRule('.budgie-item-' + budgie.budgieId + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
 
     // Create CSS rules for all possible configurations of filler elements
     for (var i = numberAcross - 1; i >= 0; i--) {
-      document.styleSheets[0].insertRule('.budgie-flex-item-' + budgie.budgieId + '--filler-' + i + '\n        {\n          width: ' + width * (budgie.options.numberWide - i) / 2 + '%; \n          height: ' + height * (budgie.options.numberHigh - i) / 2 + '%; flex-grow: 1;\n        }', numOfSheets);
+      document.styleSheets[0].insertRule('.budgie-item-' + budgie.budgieId + '--filler-' + i + '\n        {\n          width: ' + width * (budgie.options.numberWide - i) / 2 + '%; \n          height: ' + height * (budgie.options.numberHigh - i) / 2 + '%; flex-grow: 1;\n        }', numOfSheets);
     }
 
     // Get the flex direction based on the budgie direction
@@ -73,7 +73,7 @@ var BudgieDom = Object.create({
     document.styleSheets[0].insertRule('.budgie-container-' + budgie.budgieId + '{flex-direction: ' + direction + ';}', numOfSheets);
 
     // Set the overflow properties based on the budgie direction
-    document.styleSheets[0].insertRule('.budgie-flex-container-parent-' + budgie.budgieId + '\n      {\n        overflow-x: ' + (budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden') + '; \n        overflow-y: ' + (budgie.options.direction === 'vertical' ? 'scroll' : 'hidden') + '\n      }', numOfSheets);
+    document.styleSheets[0].insertRule('.budgie-container-parent-' + budgie.budgieId + '\n      {\n        overflow-x: ' + (budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden') + '; \n        overflow-y: ' + (budgie.options.direction === 'vertical' ? 'scroll' : 'hidden') + '\n      }', numOfSheets);
   },
 
   /**
@@ -85,7 +85,7 @@ var BudgieDom = Object.create({
     var scrollProperty = budgie.scrollProperty();
 
     // Get a single budgie element's measure
-    var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + budgie.budgieId);
+    var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-item-' + budgie.budgieId);
 
     // Use width or height based on budgie direction
     var budgieElementMeasure = budgie.isHorizontal() ? budgieElement.width : budgieElement.height;
@@ -124,7 +124,7 @@ var BudgieDom = Object.create({
     // If all the elements fit without scrolling, then add an extra div to allow for updates later
     if (budgie.fitsInContainer()) {
       var blankEle = document.createElement('div');
-      blankEle.classList.add('budgie-flex-item-' + budgie.budgieId + '--blank');
+      blankEle.classList.add('budgie-item-' + budgie.budgieId + '--blank');
       budgie.budgieContainer.appendChild(blankEle);
     }
   },
@@ -136,8 +136,8 @@ var BudgieDom = Object.create({
    */
   createBudgieFillerElement: function createBudgieFillerElement(budgie) {
     var filler = document.createElement('div');
-    filler.classList.add('budgie-flex-item-' + budgie.budgieId + '--filler');
-    filler.classList.add('budgie-flex-item-' + budgie.budgieId + '--filler-' + budgie.numberLeftWithOddEnding());
+    filler.classList.add('budgie-item-' + budgie.budgieId + '--filler');
+    filler.classList.add('budgie-item-' + budgie.budgieId + '--filler-' + budgie.numberLeftWithOddEnding());
     return filler;
   },
 
@@ -151,8 +151,8 @@ var BudgieDom = Object.create({
   createBudgieElement: function createBudgieElement(budgie, item, itemIndex) {
     var element = document.createElement('div');
 
-    element.classList.add('budgie-flex-item');
-    element.classList.add('budgie-flex-item-' + budgie.budgieId);
+    element.classList.add('budgie-item');
+    element.classList.add('budgie-item-' + budgie.budgieId);
     element.classList.add('budgie-' + budgie.budgieId + '-' + itemIndex);
 
     var innerDiv = BudgieDom.convertItemToElement(item);
@@ -390,10 +390,10 @@ var Budgie = function () {
     value: function scrollSizeMeasurement() {
       switch (this.options.direction) {
         case 'vertical':
-          return BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + this.budgieId).height * Math.ceil(this.items.length / this.options.numberWide);
+          return BudgieDom.measureElementWidthAndHeight('.budgie-item-' + this.budgieId).height * Math.ceil(this.items.length / this.options.numberWide);
           break;
         case 'horizontal':
-          return BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + this.budgieId).width * Math.ceil(this.items.length / this.options.numberHigh);
+          return BudgieDom.measureElementWidthAndHeight('.budgie-item-' + this.budgieId).width * Math.ceil(this.items.length / this.options.numberHigh);
           break;
       }
     }
@@ -459,7 +459,7 @@ var Budgie = function () {
   }, {
     key: 'updateAllElements',
     value: function updateAllElements() {
-      var elementCount = document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)').length;
+      var elementCount = document.querySelectorAll('.budgie-item-' + this.budgieId + ':not(.budgie-item-' + this.budgieId + '--duplicate)').length;
       if (this.items.length > elementCount) {
         for (var i = elementCount; i < this.items.length; i++) {
           this.addLastItem(i, i - 1);
@@ -487,7 +487,7 @@ var Budgie = function () {
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
-      var realElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)'));
+      var realElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + ':not(.budgie-item-' + this.budgieId + '--duplicate)'));
 
       // If the number of elements is greater than the number that fit in the given area
       if (!this.fitsInContainer()) {
@@ -502,7 +502,7 @@ var Budgie = function () {
           // Add the duplicated elements
           realElements.slice(realElements.length - this.numberLeftWithOddEnding(), realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
-            ele.classList.add('budgie-flex-item-' + _this.budgieId + '--duplicate');
+            ele.classList.add('budgie-item-' + _this.budgieId + '--duplicate');
             _this.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
 
@@ -515,7 +515,7 @@ var Budgie = function () {
           // Add the duplicated elements
           realElements.slice(realElements.length - elementsToDupe, realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
-            ele.classList.add('budgie-flex-item-' + _this.budgieId + '--duplicate');
+            ele.classList.add('budgie-item-' + _this.budgieId + '--duplicate');
             _this.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
         }
@@ -533,15 +533,15 @@ var Budgie = function () {
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
-      var realElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)'));
+      var realElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + ':not(.budgie-item-' + this.budgieId + '--duplicate)'));
 
       // If the number of elements is greater than the number that fit in the given area
       if (!this.fitsInContainer()) {
         // Appends duplicate items equal to the number of elementsOnScreen
         realElements.slice(0, elementsOnScreen).forEach(function (element) {
           var ele = element.cloneNode(true);
-          ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate');
-          ele.classList.add('budgie-flex-item-' + _this2.budgieId + '--duplicate-ending');
+          ele.classList.add('budgie-item-' + _this2.budgieId + '--duplicate');
+          ele.classList.add('budgie-item-' + _this2.budgieId + '--duplicate-ending');
           _this2.budgieContainer.insertAdjacentElement('beforeend', ele);
         });
       }
@@ -578,7 +578,7 @@ var Budgie = function () {
       // eleIndex; subtract 2 to account for using length not index, and also to get the last element before the push
       var elements = document.getElementsByClassName('budgie-' + this.budgieId + '-' + eleIndex);
       if (!elements.length > 0) {
-        elements = document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank');
+        elements = document.getElementsByClassName('budgie-item-' + this.budgieId + '--blank');
       }
 
       var newElement = BudgieDom.createBudgieElement(this, this.items[itemIndex], itemIndex);
@@ -641,10 +641,10 @@ var Budgie = function () {
         numberAtTop = this.isHorizontal() ? this.options.numberHigh : this.options.numberWide;
       }
 
-      var realElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + ':not(.budgie-flex-item-' + this.budgieId + '--duplicate)'));
+      var realElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + ':not(.budgie-item-' + this.budgieId + '--duplicate)'));
 
       // Trim the number of elements across one row to get rid of the bottom dupes
-      var dupedElements = Array.from(document.querySelectorAll('.budgie-flex-item-' + this.budgieId + '.budgie-flex-item-' + this.budgieId + '--duplicate'));
+      var dupedElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + '.budgie-item-' + this.budgieId + '--duplicate'));
       var topOfDupedElements = dupedElements.slice(0, dupedElements.length - this.elementsOnScreen());
 
       // These elements should become the new duped top row
@@ -670,7 +670,7 @@ var Budgie = function () {
       // Update the existing elements, and add new if needed
       lastRowOfRealElements.forEach(function (element, index) {
         var ele = element.cloneNode(true);
-        ele.classList.add('budgie-flex-item-' + _this4.budgieId + '--duplicate');
+        ele.classList.add('budgie-item-' + _this4.budgieId + '--duplicate');
         if (topOfDupedElements[index]) {
           topOfDupedElements[index].outerHTML = ele.outerHTML;
         } else {
@@ -703,13 +703,13 @@ var Budgie = function () {
       }
 
       if (redraw) {
-        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-item-' + this.budgieId + '--filler')).forEach(function (element) {
           return element.parentNode.removeChild(element);
         });
       }
 
       if (this.hasOddEnding()) {
-        if (document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler').length === 0) {
+        if (document.getElementsByClassName('budgie-item-' + this.budgieId + '--filler').length === 0) {
           var lastElements = Array.from(document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - 1)));
           var firstElements = Array.from(document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - this.numberLeftWithOddEnding())));
           // Put fill around all elements that need it. At the top, and the bottom.
@@ -720,35 +720,35 @@ var Budgie = function () {
             firstElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(_this5), firstElement);
           });
         } else {
-          Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
-            element.classList.remove('budgie-flex-item-' + _this5.budgieId + '--filler-' + (_this5.numberLeftWithOddEnding() + operator));
-            element.classList.add('budgie-flex-item-' + _this5.budgieId + '--filler-' + _this5.numberLeftWithOddEnding());
+          Array.from(document.getElementsByClassName('budgie-item-' + this.budgieId + '--filler')).forEach(function (element) {
+            element.classList.remove('budgie-item-' + _this5.budgieId + '--filler-' + (_this5.numberLeftWithOddEnding() + operator));
+            element.classList.add('budgie-item-' + _this5.budgieId + '--filler-' + _this5.numberLeftWithOddEnding());
           });
         }
       } else {
-        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--filler')).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-item-' + this.budgieId + '--filler')).forEach(function (element) {
           return element.parentNode.removeChild(element);
         });
       }
 
       // If all elements fit in the container and scrolling is not needed
       if (this.fitsInContainer()) {
-        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--duplicate')).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-item-' + this.budgieId + '--duplicate')).forEach(function (element) {
           return element.parentNode.removeChild(element);
         });
 
         // Append an extra div so that new items can be added
-        if (document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank').length === 0) {
+        if (document.getElementsByClassName('budgie-item-' + this.budgieId + '--blank').length === 0) {
           var blankEle = document.createElement('div');
-          blankEle.classList.add('budgie-flex-item-' + this.budgieId + '--blank');
+          blankEle.classList.add('budgie-item-' + this.budgieId + '--blank');
           this.budgieContainer.appendChild(blankEle);
         }
       }
 
-      if (!this.fitsInContainer() && document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--duplicate-ending').length === 0) {
+      if (!this.fitsInContainer() && document.getElementsByClassName('budgie-item-' + this.budgieId + '--duplicate-ending').length === 0) {
         this.appendEndingItems();
 
-        Array.from(document.getElementsByClassName('budgie-flex-item-' + this.budgieId + '--blank')).forEach(function (blankEle) {
+        Array.from(document.getElementsByClassName('budgie-item-' + this.budgieId + '--blank')).forEach(function (blankEle) {
           return blankEle.parentNode.removeChild(blankEle);
         });
       }
@@ -769,7 +769,7 @@ var Budgie = function () {
       }
 
       if (!this.budgieElementMeasurement) {
-        var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-flex-item-' + this.budgieId);
+        var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-item-' + this.budgieId);
         this.budgieElementMeasurement = Math.floor(this.isHorizontal() ? budgieElement.width : budgieElement.height);
       }
 
@@ -886,7 +886,7 @@ var Budgie = function () {
     key: 'removeBudgie',
     value: function removeBudgie() {
       this.stopAnimate();
-      this.budgieContainer.parentElement.classList.remove('budgie-flex-container-parent-' + this.budgieId);
+      this.budgieContainer.parentElement.classList.remove('budgie-container-parent-' + this.budgieId);
       this.budgieContainer.parentElement.removeChild(this.budgieContainer);
     }
   }], [{

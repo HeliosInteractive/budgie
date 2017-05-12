@@ -161,10 +161,10 @@ class Budgie {
   scrollSizeMeasurement(){
     switch(this.options.direction){
       case 'vertical':
-        return BudgieDom.measureElementWidthAndHeight(`.budgie-flex-item-${this.budgieId}`).height * (Math.ceil(this.items.length/this.options.numberWide));
+        return BudgieDom.measureElementWidthAndHeight(`.budgie-item-${this.budgieId}`).height * (Math.ceil(this.items.length/this.options.numberWide));
         break;
       case 'horizontal':
-        return BudgieDom.measureElementWidthAndHeight(`.budgie-flex-item-${this.budgieId}`).width * (Math.ceil(this.items.length/this.options.numberHigh));
+        return BudgieDom.measureElementWidthAndHeight(`.budgie-item-${this.budgieId}`).width * (Math.ceil(this.items.length/this.options.numberHigh));
         break;
     }
   }
@@ -215,7 +215,7 @@ class Budgie {
    * Updates the budgie instance based on array changes
    */
   updateAllElements(){
-    let elementCount = document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`).length
+    let elementCount = document.querySelectorAll(`.budgie-item-${this.budgieId}:not(.budgie-item-${this.budgieId}--duplicate)`).length
     if(this.items.length > elementCount){
       for(let i = elementCount; i < this.items.length; i++){
         this.addLastItem(i, i - 1);
@@ -238,7 +238,7 @@ class Budgie {
   prependStartingItems(){
     let elementsOnScreen = this.elementsOnScreen();
     // Store a list of the non duplicated elements
-    const realElements = Array.from(document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`));
+    const realElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}:not(.budgie-item-${this.budgieId}--duplicate)`));
 
     // If the number of elements is greater than the number that fit in the given area
     if(!this.fitsInContainer()){
@@ -258,7 +258,7 @@ class Budgie {
           .reverse()
           .forEach((element) => {
             let ele = element.cloneNode(true);
-            ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
+            ele.classList.add(`budgie-item-${this.budgieId}--duplicate`);
             this.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
 
@@ -276,7 +276,7 @@ class Budgie {
           .reverse()
           .forEach((element) => {
             let ele = element.cloneNode(true);
-            ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
+            ele.classList.add(`budgie-item-${this.budgieId}--duplicate`);
             this.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
       }
@@ -289,7 +289,7 @@ class Budgie {
   appendEndingItems(){
     let elementsOnScreen = this.elementsOnScreen();
     // Store a list of the non duplicated elements
-    const realElements = Array.from(document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`));
+    const realElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}:not(.budgie-item-${this.budgieId}--duplicate)`));
 
     // If the number of elements is greater than the number that fit in the given area
     if(!this.fitsInContainer()){
@@ -300,8 +300,8 @@ class Budgie {
       )
         .forEach((element) => {
           let ele = element.cloneNode(true);
-          ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
-          ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate-ending`);
+          ele.classList.add(`budgie-item-${this.budgieId}--duplicate`);
+          ele.classList.add(`budgie-item-${this.budgieId}--duplicate-ending`);
           this.budgieContainer.insertAdjacentElement('beforeend', ele);
         });
     }
@@ -327,7 +327,7 @@ class Budgie {
     // eleIndex; subtract 2 to account for using length not index, and also to get the last element before the push
     let elements = document.getElementsByClassName(`budgie-${this.budgieId}-${eleIndex}`);
     if(!elements.length > 0){
-      elements = document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--blank`)
+      elements = document.getElementsByClassName(`budgie-item-${this.budgieId}--blank`)
     }
 
     let newElement = BudgieDom.createBudgieElement(this, this.items[itemIndex], itemIndex);
@@ -375,10 +375,10 @@ class Budgie {
       numberAtTop = this.isHorizontal() ? this.options.numberHigh : this.options.numberWide;
     }
 
-    let realElements = Array.from(document.querySelectorAll(`.budgie-flex-item-${this.budgieId}:not(.budgie-flex-item-${this.budgieId}--duplicate)`));
+    let realElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}:not(.budgie-item-${this.budgieId}--duplicate)`));
 
     // Trim the number of elements across one row to get rid of the bottom dupes
-    let dupedElements = Array.from(document.querySelectorAll(`.budgie-flex-item-${this.budgieId}.budgie-flex-item-${this.budgieId}--duplicate`));
+    let dupedElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}.budgie-item-${this.budgieId}--duplicate`));
     let topOfDupedElements = dupedElements.slice(0, dupedElements.length - this.elementsOnScreen());
 
     // These elements should become the new duped top row
@@ -402,7 +402,7 @@ class Budgie {
     // Update the existing elements, and add new if needed
     lastRowOfRealElements.forEach((element, index) => {
       let ele = element.cloneNode(true);
-      ele.classList.add(`budgie-flex-item-${this.budgieId}--duplicate`);
+      ele.classList.add(`budgie-item-${this.budgieId}--duplicate`);
       if(topOfDupedElements[index]){
         topOfDupedElements[index].outerHTML = ele.outerHTML
       } else {
@@ -428,12 +428,12 @@ class Budgie {
     }
 
     if(redraw){
-      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-item-${this.budgieId}--filler`)).forEach(element =>
         element.parentNode.removeChild(element));
     }
 
     if(this.hasOddEnding()){
-      if(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`).length === 0) {
+      if(document.getElementsByClassName(`budgie-item-${this.budgieId}--filler`).length === 0) {
         let lastElements = Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${this.items.length - 1}`));
         let firstElements = Array.from(document.getElementsByClassName(`budgie-${this.budgieId}-${this.items.length - this.numberLeftWithOddEnding()}`));
         // Put fill around all elements that need it. At the top, and the bottom.
@@ -444,33 +444,33 @@ class Budgie {
           firstElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(this), firstElement);
         })
       } else {
-        Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach((element) => {
-          element.classList.remove(`budgie-flex-item-${this.budgieId}--filler-${this.numberLeftWithOddEnding() + operator}`);
-          element.classList.add(`budgie-flex-item-${this.budgieId}--filler-${this.numberLeftWithOddEnding()}`);
+        Array.from(document.getElementsByClassName(`budgie-item-${this.budgieId}--filler`)).forEach((element) => {
+          element.classList.remove(`budgie-item-${this.budgieId}--filler-${this.numberLeftWithOddEnding() + operator}`);
+          element.classList.add(`budgie-item-${this.budgieId}--filler-${this.numberLeftWithOddEnding()}`);
         });
       }
     } else {
-      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--filler`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-item-${this.budgieId}--filler`)).forEach(element =>
         element.parentNode.removeChild(element));
     }
 
     // If all elements fit in the container and scrolling is not needed
     if(this.fitsInContainer()) {
-      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--duplicate`)).forEach(element =>
+      Array.from(document.getElementsByClassName(`budgie-item-${this.budgieId}--duplicate`)).forEach(element =>
         element.parentNode.removeChild(element));
 
       // Append an extra div so that new items can be added
-      if(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--blank`).length === 0){
+      if(document.getElementsByClassName(`budgie-item-${this.budgieId}--blank`).length === 0){
         let blankEle = document.createElement('div');
-        blankEle.classList.add(`budgie-flex-item-${this.budgieId}--blank`);
+        blankEle.classList.add(`budgie-item-${this.budgieId}--blank`);
         this.budgieContainer.appendChild(blankEle);
       }
     }
 
-    if(!this.fitsInContainer() && document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--duplicate-ending`).length === 0){
+    if(!this.fitsInContainer() && document.getElementsByClassName(`budgie-item-${this.budgieId}--duplicate-ending`).length === 0){
       this.appendEndingItems();
 
-      Array.from(document.getElementsByClassName(`budgie-flex-item-${this.budgieId}--blank`)).forEach(blankEle =>
+      Array.from(document.getElementsByClassName(`budgie-item-${this.budgieId}--blank`)).forEach(blankEle =>
         blankEle.parentNode.removeChild(blankEle));
     }
   }
@@ -487,7 +487,7 @@ class Budgie {
     }
 
     if(!this.budgieElementMeasurement) {
-      let budgieElement = BudgieDom.measureElementWidthAndHeight(`.budgie-flex-item-${this.budgieId}`);
+      let budgieElement = BudgieDom.measureElementWidthAndHeight(`.budgie-item-${this.budgieId}`);
       this.budgieElementMeasurement = Math.floor(this.isHorizontal() ? budgieElement.width : budgieElement.height);
     }
 
@@ -587,7 +587,7 @@ class Budgie {
    */
   removeBudgie() {
     this.stopAnimate();
-    this.budgieContainer.parentElement.classList.remove(`budgie-flex-container-parent-${this.budgieId}`);
+    this.budgieContainer.parentElement.classList.remove(`budgie-container-parent-${this.budgieId}`);
     this.budgieContainer.parentElement.removeChild(this.budgieContainer);
   }
 }

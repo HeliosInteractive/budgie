@@ -1,6 +1,6 @@
 'use strict';
 
-const imageExtensions = ['jpg', 'gif', 'png'];
+const imageExtensions = ['jpg', 'gif', 'png', 'bmp', 'jpeg'];
 const videoExtensions = ['mp4','ogg', 'webm'];
 /**
  * BudgieDomSetup
@@ -13,11 +13,11 @@ const BudgieDom = Object.create({
    * @returns {Element} returns the budgie container
    */
   setupBudgieContainer : (budgie) => {
-    budgie.parentContainer.classList.add(`budgie-flex-container-parent`);
-    budgie.parentContainer.classList.add(`budgie-flex-container-parent-${budgie.budgieId}`);
+    budgie.parentContainer.classList.add(`budgie-container-parent`);
+    budgie.parentContainer.classList.add(`budgie-container-parent-${budgie.budgieId}`);
 
     let budgieFlexContainer = document.createElement('div');
-    budgieFlexContainer.classList.add('budgie-flex-container');
+    budgieFlexContainer.classList.add('budgie-container');
     budgieFlexContainer.classList.add(`budgie-container-${budgie.budgieId}`);
     budgie.parentContainer.appendChild(budgieFlexContainer);
 
@@ -50,13 +50,13 @@ const BudgieDom = Object.create({
 
     // Set the width and height of a single budgie element
     document.styleSheets[0].insertRule(
-      `.budgie-flex-item-${budgie.budgieId}{width: ${width}%; height: ${height}%;}`, numOfSheets
+      `.budgie-item-${budgie.budgieId}{width: ${width}%; height: ${height}%;}`, numOfSheets
     );
 
     // Create CSS rules for all possible configurations of filler elements
     for(let i = numberAcross - 1; i >= 0; i--){
       document.styleSheets[0].insertRule(
-        `.budgie-flex-item-${budgie.budgieId}--filler-${i}
+        `.budgie-item-${budgie.budgieId}--filler-${i}
         {
           width: ${width*(budgie.options.numberWide - i)/2}%; 
           height: ${height*(budgie.options.numberHigh - i)/2}%; flex-grow: 1;
@@ -75,7 +75,7 @@ const BudgieDom = Object.create({
 
     // Set the overflow properties based on the budgie direction
     document.styleSheets[0].insertRule(
-      `.budgie-flex-container-parent-${budgie.budgieId}
+      `.budgie-container-parent-${budgie.budgieId}
       {
         overflow-x: ${budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden'}; 
         overflow-y: ${budgie.options.direction === 'vertical' ? 'scroll' : 'hidden'}
@@ -93,7 +93,7 @@ const BudgieDom = Object.create({
     let scrollProperty = budgie.scrollProperty();
 
     // Get a single budgie element's measure
-    let budgieElement = BudgieDom.measureElementWidthAndHeight(`.budgie-flex-item-${budgie.budgieId}`);
+    let budgieElement = BudgieDom.measureElementWidthAndHeight(`.budgie-item-${budgie.budgieId}`);
 
     // Use width or height based on budgie direction
     let budgieElementMeasure = budgie.isHorizontal() ? budgieElement.width : budgieElement.height;
@@ -130,7 +130,7 @@ const BudgieDom = Object.create({
     // If all the elements fit without scrolling, then add an extra div to allow for updates later
     if(budgie.fitsInContainer()){
       let blankEle = document.createElement('div');
-      blankEle.classList.add(`budgie-flex-item-${budgie.budgieId}--blank`);
+      blankEle.classList.add(`budgie-item-${budgie.budgieId}--blank`);
       budgie.budgieContainer.appendChild(blankEle);
     }
   },
@@ -142,8 +142,8 @@ const BudgieDom = Object.create({
    */
   createBudgieFillerElement : (budgie) => {
     let filler = document.createElement('div');
-    filler.classList.add(`budgie-flex-item-${budgie.budgieId}--filler`);
-    filler.classList.add(`budgie-flex-item-${budgie.budgieId}--filler-${budgie.numberLeftWithOddEnding()}`);
+    filler.classList.add(`budgie-item-${budgie.budgieId}--filler`);
+    filler.classList.add(`budgie-item-${budgie.budgieId}--filler-${budgie.numberLeftWithOddEnding()}`);
     return filler;
   },
 
@@ -157,8 +157,8 @@ const BudgieDom = Object.create({
   createBudgieElement : (budgie, item, itemIndex) => {
     let element = document.createElement('div');
 
-    element.classList.add('budgie-flex-item');
-    element.classList.add(`budgie-flex-item-${budgie.budgieId}`);
+    element.classList.add('budgie-item');
+    element.classList.add(`budgie-item-${budgie.budgieId}`);
     element.classList.add(`budgie-${budgie.budgieId}-${itemIndex}`);
 
     const innerDiv = BudgieDom.convertItemToElement(item)
