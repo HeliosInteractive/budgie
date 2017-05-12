@@ -80,7 +80,7 @@ Configuration options are passed on initialization as an options object.
 |secondsOnPage|Fixnum|1.0...n|1.0|This determines how long a Budgie Item stays within the Budgie element (how long the viewer can see it before it goes off screen). The lower the number, the faster it will go. This combined with the size of the Budgie Element will determine the speed of the scroll. **This is only used if autoScroll is true.**|
 |infiniteScroll|Boolean|true, false|true|If this is set to true, then scrolling will wrap around allowing for infinite scrolling (scrolling down will wrap around and put you at the top, or vice versa).|
 |autoScroll|Boolean|true, false|true|If autoScroll is on, then Budgie will automatically scroll through the elements using the secondsOnPage and Budgie element size to determine speed.|
-|autoStart|Boolean|true, false|true|If this is true, then the Budgie element will automatically start on `new Budgie`. Otherwise it can be manually started with `Budgie.start()` **This is only used if autoScroll is true.**|
+|autoStart|Boolean|true, false|true|If this is true, then the Budgie element will automatically start on `new Budgie`. Otherwise it can be manually started with `Budgie.budgieAnimate()` **This is only used if autoScroll is true.**|
 
 
 ## Methods available
