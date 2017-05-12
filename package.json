@@ -1,8 +1,8 @@
 {
   "name": "@helios-interactive/budgie",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A plugin to handle all your scrolling needs.",
-  "main":"dist/@helios-interactive/budgie.js",
+  "main": "dist/@helios-interactive/budgie.js",
   "scripts": {
     "build": "grunt build",
     "start": "grunt dev",
