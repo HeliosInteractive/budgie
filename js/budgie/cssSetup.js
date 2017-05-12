@@ -1,3 +1,8 @@
+'use strict';
+
+let styleBlock = document.createElement('style');
+
+styleBlock.innerHTML = `
 .budgie-flex-container, .budgie-flex-container--vertical, .budgie-flex-container--horizontal {
   width: 100%;
   height: 100%;
@@ -16,14 +21,6 @@
   overflow: -moz-scrollbars-none; }
   .budgie-flex-container-parent::-webkit-scrollbar {
     display: none; }
+`;
 
-body {
-  background-color: grey;
-  margin: 0 0 0 0; }
-
-.main {
-  width: 50vw;
-  height: 50vh;
-  position: fixed;
-  left: 25%;
-  top: 25%; }
+document.head.appendChild(styleBlock);
