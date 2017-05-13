@@ -77,7 +77,7 @@ Configuration options are passed on initialization as an options object.
 |direction|String|'vertical', 'horizontal'|'vertical'|This will set which axis the Budgie element will scroll on.|
 |inverted|Boolean|true, false|false|By default horizontal will scroll from left to right, and vertical will scroll from top to bottom. This will invert those directions so that horizontal will scroll from right to left, and vertical will scroll from bottom to top. **This is only used if autoScroll is true.**|
 |fps|Integer|1...n|60|This determines how often Budgie animates. A higher fps will provide a smoother animation, at the cost of performance. Between 30 and 60 is usually optimal. **This is only used if autoScroll is true.**|
-|secondsOnPage|Fixnum|1.0...n|1.0|This determines how long a Budgie Item stays within the Budgie element (how long the viewer can see it before it goes off screen). The lower the number, the faster it will go. This combined with the size of the Budgie Element will determine the speed of the scroll. **This is only used if autoScroll is true.**|
+|secondsOnPage|Float|1.0...n|1.0|This determines how long a Budgie Item stays within the Budgie element (how long the viewer can see it before it goes off screen). The lower the number, the faster it will go. This combined with the size of the Budgie Element will determine the speed of the scroll. **This is only used if autoScroll is true.**|
 |infiniteScroll|Boolean|true, false|true|If this is set to true, then scrolling will wrap around allowing for infinite scrolling (scrolling down will wrap around and put you at the top, or vice versa).|
 |autoScroll|Boolean|true, false|true|If autoScroll is on, then Budgie will automatically scroll through the elements using the secondsOnPage and Budgie element size to determine speed.|
 |autoStart|Boolean|true, false|true|If this is true, then the Budgie element will automatically start on `new Budgie`. Otherwise it can be manually started with `Budgie.budgieAnimate()` **This is only used if autoScroll is true.**|
@@ -120,7 +120,7 @@ For more support add:
  - Flexbox pollyfill
  - forEach pollyfill
  
- ## License
+## License
  
  MIT License
  
