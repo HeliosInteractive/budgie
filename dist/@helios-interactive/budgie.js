@@ -93,6 +93,20 @@ var BudgieDom = Object.create({
     // Set the scroll position to the top of the non-duped elements
     budgie.parentContainer[scrollProperty] = budgieElementMeasure;
 
+    // Bind events to handle scrolling with a mouse
+    budgie.parentContainer.addEventListener("mousedown", function () {
+      budgie.mouseDown = true;
+    });
+    budgie.parentContainer.addEventListener("mouseup", function () {
+      budgie.mouseDown = false;
+    });
+    budgie.parentContainer.addEventListener("mouseout", function () {
+      budgie.mouseDown = false;
+    });
+    budgie.parentContainer.addEventListener("mousemove", function (event) {
+      budgie.onMouseMove(event, scrollProperty);
+    });
+
     // Bind an event listener to the scroll event
     budgie.parentContainer.addEventListener("scroll", function () {
       budgie.onScroll(scrollProperty);
@@ -226,6 +240,8 @@ var Budgie = function () {
     this.budgieId = Math.floor((1 + Math.random()) * 0x10000);
     // save a reference to the items array
     this.items = items;
+    // boolean saying whether there is a mouse currently clicking the budgie element
+    this.mouseDown = false;
 
     // Provide methods for manipulating the items array
     var self = this;
@@ -780,6 +796,17 @@ var Budgie = function () {
       } else if (this.parentContainer[scrollDirection] <= 0) {
         this.parentContainer[scrollDirection] = this.scrollContainerSize;
       }
+    }
+  }, {
+    key: 'onMouseMove',
+    value: function onMouseMove(event, scrollDirection) {
+      // If the mouse is not down, then we don't care, bail early
+      if (!this.mouseDown) {
+        return;
+      }
+
+      this.parentContainer[scrollDirection] -= this.isHorizontal() ? event.movementX : event.movementY;
+      console.log("mouse moved", event);
     }
 
     /**

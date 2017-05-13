@@ -16,6 +16,8 @@ class Budgie {
     this.budgieId = Math.floor((1 + Math.random()) * 0x10000);
     // save a reference to the items array
     this.items = items;
+    // boolean saying whether there is a mouse currently clicking the budgie element
+    this.mouseDown = false;
 
     // Provide methods for manipulating the items array
     var self = this;
@@ -498,6 +500,14 @@ class Budgie {
     } else if((this.parentContainer[scrollDirection] <= 0 )) {
       this.parentContainer[scrollDirection] = this.scrollContainerSize;
     }
+  }
+
+  onMouseMove(event, scrollDirection) {
+    // If the mouse is not down, then we don't care, bail early
+    if(!this.mouseDown) { return }
+
+    this.parentContainer[scrollDirection] -= this.isHorizontal() ? event.movementX : event.movementY;
+    console.log("mouse moved", event)
   }
 
   /**

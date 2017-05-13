@@ -101,8 +101,14 @@ const BudgieDom = Object.create({
     // Set the scroll position to the top of the non-duped elements
     budgie.parentContainer[scrollProperty] = budgieElementMeasure;
 
+    // Bind events to handle scrolling with a mouse
+    budgie.parentContainer.addEventListener("mousedown", () => {budgie.mouseDown = true});
+    budgie.parentContainer.addEventListener("mouseup", () => {budgie.mouseDown = false});
+    budgie.parentContainer.addEventListener("mouseout", () => {budgie.mouseDown = false});
+    budgie.parentContainer.addEventListener("mousemove", (event) => { budgie.onMouseMove(event, scrollProperty) });
+
     // Bind an event listener to the scroll event
-    budgie.parentContainer.addEventListener("scroll", function(){budgie.onScroll(scrollProperty)});
+    budgie.parentContainer.addEventListener("scroll", () => {budgie.onScroll(scrollProperty)});
   },
 
   /**
