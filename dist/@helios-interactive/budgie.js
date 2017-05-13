@@ -93,6 +93,20 @@ var BudgieDom = Object.create({
     // Set the scroll position to the top of the non-duped elements
     budgie.parentContainer[scrollProperty] = budgieElementMeasure;
 
+    // Bind an event listener to the scroll event
+    budgie.parentContainer.addEventListener("scroll", function () {
+      budgie.onScroll(scrollProperty);
+    });
+  },
+
+  /**
+   * Binds events so that mouse drag will allow for scrolling
+   * @param budgie
+   */
+  setupBudgieMouseDrag: function setupBudgieMouseDrag(budgie) {
+    // Get the scroll property (scrollTop or scrollLeft)
+    var scrollProperty = budgie.scrollProperty();
+
     // Bind events to handle scrolling with a mouse
     budgie.parentContainer.addEventListener("mousedown", function () {
       budgie.mouseDown = true;
@@ -105,11 +119,6 @@ var BudgieDom = Object.create({
     });
     budgie.parentContainer.addEventListener("mousemove", function (event) {
       budgie.onMouseMove(event, scrollProperty);
-    });
-
-    // Bind an event listener to the scroll event
-    budgie.parentContainer.addEventListener("scroll", function () {
-      budgie.onScroll(scrollProperty);
     });
   },
 
@@ -819,6 +828,7 @@ var Budgie = function () {
       this.budgieContainer = BudgieDom.setupBudgieContainer(this);
       BudgieDom.setupBudgieCSS(this);
       BudgieDom.insertBudgieElements(this);
+      BudgieDom.setupBudgieMouseDrag(this);
       // Only append extra items, and bind the scroll event if this is infinite scroll.
       if (this.options.infiniteScroll) {
         this.appendEndingItems();

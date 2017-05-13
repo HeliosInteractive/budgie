@@ -101,14 +101,23 @@ const BudgieDom = Object.create({
     // Set the scroll position to the top of the non-duped elements
     budgie.parentContainer[scrollProperty] = budgieElementMeasure;
 
+    // Bind an event listener to the scroll event
+    budgie.parentContainer.addEventListener("scroll", () => {budgie.onScroll(scrollProperty)});
+  },
+
+  /**
+   * Binds events so that mouse drag will allow for scrolling
+   * @param budgie
+   */
+  setupBudgieMouseDrag : (budgie) => {
+    // Get the scroll property (scrollTop or scrollLeft)
+    let scrollProperty = budgie.scrollProperty();
+
     // Bind events to handle scrolling with a mouse
     budgie.parentContainer.addEventListener("mousedown", () => {budgie.mouseDown = true});
     budgie.parentContainer.addEventListener("mouseup", () => {budgie.mouseDown = false});
     budgie.parentContainer.addEventListener("mouseout", () => {budgie.mouseDown = false});
     budgie.parentContainer.addEventListener("mousemove", (event) => { budgie.onMouseMove(event, scrollProperty) });
-
-    // Bind an event listener to the scroll event
-    budgie.parentContainer.addEventListener("scroll", () => {budgie.onScroll(scrollProperty)});
   },
 
   /**

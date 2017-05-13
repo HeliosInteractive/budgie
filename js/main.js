@@ -517,6 +517,7 @@ class Budgie {
     this.budgieContainer = BudgieDom.setupBudgieContainer(this);
     BudgieDom.setupBudgieCSS(this);
     BudgieDom.insertBudgieElements(this);
+    BudgieDom.setupBudgieMouseDrag(this);
     // Only append extra items, and bind the scroll event if this is infinite scroll.
     if(this.options.infiniteScroll){
       this.appendEndingItems();
