@@ -502,8 +502,10 @@ var Budgie = function () {
         var className = Array.from(element.classList).filter(function (_className) {
           return _className.match(new RegExp('budgie-' + _this.budgieId + '-\\d'));
         });
-        element.classList.remove(className);
-        element.classList.add('budgie-' + _this.budgieId + '-' + index);
+        if (className !== 'budgie-' + _this.budgieId + '-' + index) {
+          element.classList.remove(className);
+          element.classList.add('budgie-' + _this.budgieId + '-' + index);
+        }
       });
 
       // remove duplicate elements

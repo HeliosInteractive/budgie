@@ -489,8 +489,10 @@ class Budgie {
     const realElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}:not(.budgie-item-${this.budgieId}--duplicate)`));
     realElements.forEach((element, index) => {
       let className = Array.from(element.classList).filter(_className => _className.match(new RegExp(`budgie-${this.budgieId}-\\d`)));
-      element.classList.remove(className);
-      element.classList.add(`budgie-${this.budgieId}-${index}`);
+      if(className !== `budgie-${this.budgieId}-${index}`) {
+        element.classList.remove(className);
+        element.classList.add(`budgie-${this.budgieId}-${index}`);
+      }
     })
 
     // remove duplicate elements

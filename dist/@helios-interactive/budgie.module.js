@@ -1,4 +1,4 @@
-/*Budgie ES6 Module v1.0.9*/
+/*Budgie ES6 Module v1.0.10*/
 export default Budgie = (function() {
 
 
@@ -219,7 +219,8 @@ var imageExtensions = [ "jpg", "gif", "png", "bmp", "jpeg" ], videoExtensions = 
                 var className = Array.from(element.classList).filter(function(_className) {
                     return _className.match(new RegExp("budgie-" + _this.budgieId + "-\\d"));
                 });
-                element.classList.remove(className), element.classList.add("budgie-" + _this.budgieId + "-" + index);
+                className !== "budgie-" + _this.budgieId + "-" + index && (element.classList.remove(className), 
+                element.classList.add("budgie-" + _this.budgieId + "-" + index));
             }), Array.from(document.querySelectorAll(".budgie-item-" + this.budgieId + ".budgie-item-" + this.budgieId + "--duplicate")).forEach(function(element) {
                 element.parentNode.removeChild(element);
             }), Array.from(document.querySelectorAll(".budgie-item-" + this.budgieId + "--filler")).forEach(function(element) {
