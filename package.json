@@ -1,6 +1,6 @@
 {
   "name": "@helios-interactive/budgie",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A plugin to handle all your scrolling needs.",
   "main": "dist/@helios-interactive/budgie.js",
   "jsnext:main": "dist/@helios-interactive/budgie.module.js",
