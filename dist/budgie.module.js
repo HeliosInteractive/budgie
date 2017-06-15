@@ -1,30 +1,5 @@
-/*Budgie v1.0.7*/
-(function(factory) {
-    
-    // Establish the root object, window (self) in the browser, or global on the server.
-    // We use self instead of window for WebWorker support.
-    var root = (typeof self == 'object' && self.self === self && self) ||
-        (typeof module == 'object' && module);
-
-    // Set up Budgie appropriately for the environment. Start with AMD.
-    if (typeof define === 'function' && define.amd) {
-      define('Budgie', ['exports'], function(exports) {
-        // Export global even in AMD case in case this script is loaded with
-        // others that may still expect a global Budgie.
-        root.Budgie = factory();
-        // return Budgie for correct AMD use
-        return root.Budgie;
-      });
-
-      // Next for Node.js or CommonJS.
-    } else if (typeof exports !== 'undefined') {
-        root.exports = factory();
-      // Finally, as a browser global.
-    } else {
-      root.Budgie = factory();
-    }
-
-  })(function() {
+/*Budgie ES6 Module v1.0.7*/
+export default Budgie = (function() {
 
 
 "use strict";
@@ -471,6 +446,6 @@ var imageExtensions = [ "jpg", "gif", "png", "bmp", "jpeg" ], videoExtensions = 
 }();
 
 "undefined" != typeof global && (global.Budgie = Budgie);
-//# sourceMappingURL=../dist/%40helios-interactive/budgie.es6.map
-    return Budgie;
-  });
+//# sourceMappingURL=%40helios-interactive/budgie.es6.map
+            return Budgie;
+          })();

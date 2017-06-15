@@ -89,6 +89,7 @@ Configuration options are passed on initialization as an options object.
 
 |Method|Arguments|Description|
 |---|---|---|
+|setItems|items - the array of items that you want budgie to display|This method will compare the items passed as arguments, to Budgie's previous set of items. It will then update Budgie, adding/removing elements where needed.|
 |budgieAnimate||Will start Budgie autoscrolling|
 |stopAnimate||Will stop Budgie from autoscrolling|
 |changeInversion||Will toggle the inversion to the opposite of it's current setting|
