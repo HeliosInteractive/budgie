@@ -85,7 +85,7 @@ module.exports = function(grunt){
           })();`
         },
         files: {
-          'dist/budgie.module.js': ['dist/<%= pkg.name %>.js']
+          'dist/<%= pkg.name %>.module.js': ['dist/<%= pkg.name %>.js']
         }
       }
     },

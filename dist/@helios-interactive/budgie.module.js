@@ -1,4 +1,4 @@
-/*Budgie ES6 Module v1.0.7*/
+/*Budgie ES6 Module v1.0.8*/
 export default Budgie = (function() {
 
 
@@ -446,6 +446,6 @@ var imageExtensions = [ "jpg", "gif", "png", "bmp", "jpeg" ], videoExtensions = 
 }();
 
 "undefined" != typeof global && (global.Budgie = Budgie);
-//# sourceMappingURL=%40helios-interactive/budgie.es6.map
+//# sourceMappingURL=budgie.es6.map
             return Budgie;
           })();
