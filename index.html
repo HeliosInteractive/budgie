@@ -35,33 +35,51 @@
         'http://placehold.it/350x150/660090.jpg',
         'http://placehold.it/350x150/400090.jpg',
         'http://placehold.it/350x150/550099.jpg',
-        'http://placehold.it/350x150/3300ff.jpg',
+        'http://placehold.it/350x150/3350ff.jpg',
         'http://placehold.it/350x150/2200ee.jpg',
         'http://placehold.it/350x150/1100bb.jpg',
+        'http://placehold.it/350x150/660290.jpg',
+        'http://placehold.it/350x150/770134.jpg',
+        'http://placehold.it/350x150/880200.jpg',
+        'http://placehold.it/350x150/3304ff.jpg',
         'http://placehold.it/350x150/660000.jpg',
-        'http://placehold.it/350x150/770034.jpg',
-        'http://placehold.it/350x150/880000.jpg',
-        'http://placehold.it/350x150/3300ff.jpg',
-        'http://placehold.it/350x150/660000.jpg',
-        'http://placehold.it/350x150/770034.jpg',
-        'http://placehold.it/350x150/880000.jpg',
-        'http://placehold.it/350x150/3300ff.jpg',
-        'http://placehold.it/350x150/770034.jpg',
-        'http://placehold.it/350x150/880000.jpg',
-        'http://placehold.it/350x150/3300ff.jpg',
+        'http://placehold.it/350x150/770234.jpg',
+        'http://placehold.it/350x150/880300.jpg',
+        'http://placehold.it/350x150/3320ff.jpg',
+        'http://placehold.it/350x150/770334.jpg',
+        'http://placehold.it/350x150/880400.jpg',
+        'http://placehold.it/350x150/3330ff.jpg',
       ];
 
       let opts =           {
         'numberHigh': 2,
         'numberWide': 3,
-        'secondsOnPage': 5.0,
+        'secondsOnPage': 2.0,
         'direction': 'vertical',
-        'autoScroll': false,
+        'autoScroll': true,
         'infiniteScroll': true,
         'inverted': true
       }
 
       let a = new Budgie(sampleImages, '.main', opts);
+
+      // var r = Array.from(sampleImages)
+      // r.shift()
+      // r.pop()
+      // r.shift()
+      // r.push("http://placehold.it/350x150/474529.jpg")
+      // r.push("http://placehold.it/350x150/474539.jpg")
+      // r.unshift("http://placehold.it/350x150/484539.jpg")
+      // a.setItems(r);
     </script>
+
+    <style>
+      .budgie-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+
   </body>
 </html>

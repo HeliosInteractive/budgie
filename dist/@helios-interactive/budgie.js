@@ -249,6 +249,8 @@ var Budgie = function () {
     this.budgieId = Math.floor((1 + Math.random()) * 0x10000);
     // save a reference to the items array
     this.items = items;
+    // create the previousItems array, used when updated via setItems
+    this.previousItems = [];
     // boolean saying whether there is a mouse currently clicking the budgie element
     this.mouseDown = false;
 
@@ -424,6 +426,114 @@ var Budgie = function () {
     }
 
     /**
+     * Updates the items array, and also updates the budgie instance
+     * This method will attempt to not alter any budgie items that do not need altering
+     * It will instead remove no longer needed items, and add new items
+     * @param items
+     */
+
+  }, {
+    key: 'setItems',
+    value: function setItems(items) {
+      var _this = this;
+
+      var currentFiller = this.numberLeftWithOddEnding();
+      /**
+       * Will return the indexes (from the old array) of items that were removed
+       * @param oldArray
+       * @param newArray
+       */
+      var removedIndexes = function removedIndexes(oldArray, newArray) {
+        var rawArray = oldArray.map(function (oldItem, index) {
+          if (!newArray.some(function (newItem) {
+            return newItem === oldItem;
+          })) {
+            return index;
+          }
+        });
+
+        return rawArray.filter(function (index) {
+          return index || index === 0;
+        });
+      };
+
+      /**
+       * Will return the indexes (from the new array) of items that were added
+       * @param oldArray
+       * @param newArray
+       */
+      var addedIndexes = function addedIndexes(oldArray, newArray) {
+        var rawArray = newArray.map(function (newItem, index) {
+          if (!oldArray.some(function (oldItem) {
+            return oldItem === newItem;
+          })) {
+            return index;
+          }
+        });
+
+        return rawArray.filter(function (index) {
+          return index || index === 0;
+        });
+      };
+
+      this.previousItems = this.items.slice();
+      this.items = items.slice();
+
+      var indexesToRemove = removedIndexes(this.previousItems, this.items);
+      var indexesToAdd = addedIndexes(this.previousItems, this.items);
+
+      // console.log('add:', indexesToAdd, 'remove:', indexesToRemove)
+
+      if (indexesToRemove.length > 0) {
+        indexesToRemove.forEach(function (index) {
+          _this.removeLastItem(index);
+        });
+      }
+
+      if (indexesToAdd.length > 0) {
+        indexesToAdd.forEach(function (index) {
+          _this.addItemAtIndex(index);
+        });
+      }
+
+      // When adding we have to update the index every time
+      var realElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + ':not(.budgie-item-' + this.budgieId + '--duplicate)'));
+      realElements.forEach(function (element, index) {
+        var className = Array.from(element.classList).filter(function (_className) {
+          return _className.match(new RegExp('budgie-' + _this.budgieId + '-\\d'));
+        });
+        element.classList.remove(className);
+        element.classList.add('budgie-' + _this.budgieId + '-' + index);
+      });
+
+      // remove duplicate elements
+      var dupedElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + '.budgie-item-' + this.budgieId + '--duplicate'));
+      dupedElements.forEach(function (element) {
+        element.parentNode.removeChild(element);
+      });
+
+      // remove filler elements
+      var fillerElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + '--filler'));
+      fillerElements.forEach(function (element) {
+        element.parentNode.removeChild(element);
+      });
+
+      // Insert duplicated elements anew
+      this.prependStartingItems();
+      this.appendEndingItems();
+
+      // Add filler items to the end if needed
+      if (this.numberLeftWithOddEnding() > 0) {
+        realElements[realElements.length - this.numberLeftWithOddEnding()].insertAdjacentElement('beforebegin', BudgieDom.createBudgieFillerElement(this));
+
+        realElements[realElements.length - 1].insertAdjacentElement('afterend', BudgieDom.createBudgieFillerElement(this));
+      }
+
+      this.clearMeasurements();
+      this.budgieAnimate();
+    }
+
+    /**
      * Updates the budgie instance based on array changes
      */
 
@@ -489,12 +599,12 @@ var Budgie = function () {
         for (var i = elementCount; i < this.items.length; i++) {
           this.addLastItem(i, i - 1);
         }
-        this.updateBeginningAndEndingItems('add', true);
+        this.updateBeginningAndEndingItems('add');
       } else if (this.items.length < elementCount) {
         for (var _i = elementCount; _i > this.items.length; _i--) {
           this.removeLastItem(_i - 1);
         }
-        this.updateBeginningAndEndingItems('remove', true);
+        this.updateBeginningAndEndingItems('remove');
       }
       this.updateExistingItems();
       this.clearMeasurements();
@@ -508,7 +618,7 @@ var Budgie = function () {
   }, {
     key: 'prependStartingItems',
     value: function prependStartingItems() {
-      var _this = this;
+      var _this2 = this;
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
@@ -527,8 +637,8 @@ var Budgie = function () {
           // Add the duplicated elements
           realElements.slice(realElements.length - this.numberLeftWithOddEnding(), realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
-            ele.classList.add('budgie-item-' + _this.budgieId + '--duplicate');
-            _this.budgieContainer.insertAdjacentElement('afterbegin', ele);
+            ele.classList.add('budgie-item-' + _this2.budgieId + '--duplicate');
+            _this2.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
 
           // Add a filler item so that odd ending lists will have a centered ending
@@ -540,8 +650,8 @@ var Budgie = function () {
           // Add the duplicated elements
           realElements.slice(realElements.length - elementsToDupe, realElements.length).reverse().forEach(function (element) {
             var ele = element.cloneNode(true);
-            ele.classList.add('budgie-item-' + _this.budgieId + '--duplicate');
-            _this.budgieContainer.insertAdjacentElement('afterbegin', ele);
+            ele.classList.add('budgie-item-' + _this2.budgieId + '--duplicate');
+            _this2.budgieContainer.insertAdjacentElement('afterbegin', ele);
           });
         }
       }
@@ -554,7 +664,7 @@ var Budgie = function () {
   }, {
     key: 'appendEndingItems',
     value: function appendEndingItems() {
-      var _this2 = this;
+      var _this3 = this;
 
       var elementsOnScreen = this.elementsOnScreen();
       // Store a list of the non duplicated elements
@@ -565,10 +675,23 @@ var Budgie = function () {
         // Appends duplicate items equal to the number of elementsOnScreen
         realElements.slice(0, elementsOnScreen).forEach(function (element) {
           var ele = element.cloneNode(true);
-          ele.classList.add('budgie-item-' + _this2.budgieId + '--duplicate');
-          ele.classList.add('budgie-item-' + _this2.budgieId + '--duplicate-ending');
-          _this2.budgieContainer.insertAdjacentElement('beforeend', ele);
+          ele.classList.add('budgie-item-' + _this3.budgieId + '--duplicate');
+          ele.classList.add('budgie-item-' + _this3.budgieId + '--duplicate-ending');
+          _this3.budgieContainer.insertAdjacentElement('beforeend', ele);
         });
+      }
+    }
+  }, {
+    key: 'addItemAtIndex',
+    value: function addItemAtIndex(index) {
+      // Get the element before where we want to add if the index is >0
+      var realElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + ':not(.budgie-item-' + this.budgieId + '--duplicate)'));
+      var newElement = BudgieDom.createBudgieElement(this, this.items[index], index);
+
+      if (index > 0) {
+        realElements[index - 1].insertAdjacentElement('afterend', newElement);
+      } else {
+        realElements[index].insertAdjacentElement('beforebegin', newElement);
       }
     }
 
@@ -623,13 +746,13 @@ var Budgie = function () {
   }, {
     key: 'updateExistingItems',
     value: function updateExistingItems() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.items.forEach(function (item, index) {
-        Array.from(document.getElementsByClassName('budgie-' + _this3.budgieId + '-' + index)).forEach(function (element) {
+        Array.from(document.getElementsByClassName('budgie-' + _this4.budgieId + '-' + index)).forEach(function (element) {
           // If the element has changed then update, otherwise do nothing
 
-          var newElement = BudgieDom.createBudgieElement(_this3, item, index);
+          var newElement = BudgieDom.createBudgieElement(_this4, item, index);
           // update the element if it does not currently match
           if (element.innerHTML !== newElement.innerHTML) {
             element.innerHTML = newElement.innerHTML;
@@ -657,7 +780,7 @@ var Budgie = function () {
   }, {
     key: 'updateListStart',
     value: function updateListStart() {
-      var _this4 = this;
+      var _this5 = this;
 
       var numberAtTop = void 0;
       if (this.hasOddEnding()) {
@@ -695,7 +818,7 @@ var Budgie = function () {
       // Update the existing elements, and add new if needed
       lastRowOfRealElements.forEach(function (element, index) {
         var ele = element.cloneNode(true);
-        ele.classList.add('budgie-item-' + _this4.budgieId + '--duplicate');
+        ele.classList.add('budgie-item-' + _this5.budgieId + '--duplicate');
         if (topOfDupedElements[index]) {
           topOfDupedElements[index].outerHTML = ele.outerHTML;
         } else {
@@ -713,7 +836,7 @@ var Budgie = function () {
   }, {
     key: 'updateListEnding',
     value: function updateListEnding(method) {
-      var _this5 = this;
+      var _this6 = this;
 
       var redraw = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
@@ -739,15 +862,15 @@ var Budgie = function () {
           var firstElements = Array.from(document.getElementsByClassName('budgie-' + this.budgieId + '-' + (this.items.length - this.numberLeftWithOddEnding())));
           // Put fill around all elements that need it. At the top, and the bottom.
           lastElements.forEach(function (lastElement) {
-            lastElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(_this5), lastElement.nextSibling);
+            lastElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(_this6), lastElement.nextSibling);
           });
           firstElements.forEach(function (firstElement) {
-            firstElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(_this5), firstElement);
+            firstElement.parentNode.insertBefore(BudgieDom.createBudgieFillerElement(_this6), firstElement);
           });
         } else {
           Array.from(document.getElementsByClassName('budgie-item-' + this.budgieId + '--filler')).forEach(function (element) {
-            element.classList.remove('budgie-item-' + _this5.budgieId + '--filler-' + (_this5.numberLeftWithOddEnding() + operator));
-            element.classList.add('budgie-item-' + _this5.budgieId + '--filler-' + _this5.numberLeftWithOddEnding());
+            element.classList.remove('budgie-item-' + _this6.budgieId + '--filler-' + (_this6.numberLeftWithOddEnding() + operator));
+            element.classList.add('budgie-item-' + _this6.budgieId + '--filler-' + _this6.numberLeftWithOddEnding());
           });
         }
       } else {
@@ -844,7 +967,7 @@ var Budgie = function () {
   }, {
     key: 'budgieAnimate',
     value: function budgieAnimate() {
-      var _this6 = this;
+      var _this7 = this;
 
       // Will not animate if autoScroll is off
       if (!this.options.autoScroll) {
@@ -877,13 +1000,13 @@ var Budgie = function () {
       if (!this.fitsInContainer()) {
         this.interval = setInterval(function () {
           // Get the current value of the scroll
-          currentScroll = _this6.budgieContainer.parentElement[scrollDirection];
+          currentScroll = _this7.budgieContainer.parentElement[scrollDirection];
 
           // Add or subtract from the current value based on inverted or not
-          _this6.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
+          _this7.options.inverted ? currentScroll += scrollSpeed : currentScroll -= scrollSpeed;
 
           // Apply the new scroll value
-          _this6.budgieContainer.parentElement[scrollDirection] = currentScroll;
+          _this7.budgieContainer.parentElement[scrollDirection] = currentScroll;
         }, 1000 / fps);
       } else {
         // Set the scroll property to 0 if all elements fit in the container

@@ -268,6 +268,8 @@ class Budgie {
     this.budgieId = Math.floor((1 + Math.random()) * 0x10000);
     // save a reference to the items array
     this.items = items;
+    // create the previousItems array, used when updated via setItems
+    this.previousItems = [];
     // boolean saying whether there is a mouse currently clicking the budgie element
     this.mouseDown = false;
 
@@ -424,6 +426,103 @@ class Budgie {
   }
 
   /**
+   * Updates the items array, and also updates the budgie instance
+   * This method will attempt to not alter any budgie items that do not need altering
+   * It will instead remove no longer needed items, and add new items
+   * @param items
+   */
+  setItems(items){
+    const currentFiller = this.numberLeftWithOddEnding()
+    /**
+     * Will return the indexes (from the old array) of items that were removed
+     * @param oldArray
+     * @param newArray
+     */
+    const removedIndexes = (oldArray, newArray) => {
+      let rawArray = oldArray.map((oldItem, index) => {
+        if(!newArray.some(newItem => newItem === oldItem)){
+          return index;
+        }
+      })
+
+      return rawArray.filter( index => (index || index === 0) );
+    }
+
+
+    /**
+     * Will return the indexes (from the new array) of items that were added
+     * @param oldArray
+     * @param newArray
+     */
+    const addedIndexes = (oldArray, newArray) => {
+      let rawArray = newArray.map((newItem, index) => {
+        if(!oldArray.some(oldItem => oldItem === newItem)){
+          return index;
+        }
+      })
+
+      return rawArray.filter( index => (index || index === 0) );
+    }
+
+
+    this.previousItems = this.items.slice();
+    this.items = items.slice();
+
+    let indexesToRemove = removedIndexes(this.previousItems, this.items);
+    let indexesToAdd = addedIndexes(this.previousItems, this.items);
+
+    // console.log('add:', indexesToAdd, 'remove:', indexesToRemove)
+
+    if(indexesToRemove.length > 0) {
+      indexesToRemove.forEach(index => {
+        this.removeLastItem(index);
+      })
+    }
+
+    if(indexesToAdd.length > 0) {
+      indexesToAdd.forEach(index => {
+        this.addItemAtIndex(index);
+      })
+    }
+
+    // When adding we have to update the index every time
+    const realElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}:not(.budgie-item-${this.budgieId}--duplicate)`));
+    realElements.forEach((element, index) => {
+      let className = Array.from(element.classList).filter(_className => _className.match(new RegExp(`budgie-${this.budgieId}-\\d`)));
+      element.classList.remove(className);
+      element.classList.add(`budgie-${this.budgieId}-${index}`);
+    })
+
+    // remove duplicate elements
+    const dupedElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}.budgie-item-${this.budgieId}--duplicate`));
+    dupedElements.forEach(element => {
+      element.parentNode.removeChild(element);
+    })
+
+    // remove filler elements
+    const fillerElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}--filler`));
+    fillerElements.forEach(element => {
+      element.parentNode.removeChild(element);
+    })
+
+    // Insert duplicated elements anew
+    this.prependStartingItems();
+    this.appendEndingItems();
+
+    // Add filler items to the end if needed
+    if(this.numberLeftWithOddEnding() > 0) {
+      realElements[realElements.length - this.numberLeftWithOddEnding()]
+        .insertAdjacentElement('beforebegin', BudgieDom.createBudgieFillerElement(this))
+
+      realElements[realElements.length - 1]
+        .insertAdjacentElement('afterend', BudgieDom.createBudgieFillerElement(this))
+    }
+
+    this.clearMeasurements();
+    this.budgieAnimate();
+  }
+
+  /**
    * Updates the budgie instance based on array changes
    */
   pushItem(){
@@ -474,12 +573,12 @@ class Budgie {
       for(let i = elementCount; i < this.items.length; i++){
         this.addLastItem(i, i - 1);
       }
-      this.updateBeginningAndEndingItems('add', true);
+      this.updateBeginningAndEndingItems('add');
     } else if (this.items.length < elementCount) {
       for(let i = elementCount; i > this.items.length; i--){
         this.removeLastItem(i-1);
       }
-      this.updateBeginningAndEndingItems('remove', true);
+      this.updateBeginningAndEndingItems('remove');
     }
     this.updateExistingItems();
     this.clearMeasurements();
@@ -558,6 +657,18 @@ class Budgie {
           ele.classList.add(`budgie-item-${this.budgieId}--duplicate-ending`);
           this.budgieContainer.insertAdjacentElement('beforeend', ele);
         });
+    }
+  }
+
+  addItemAtIndex(index){
+    // Get the element before where we want to add if the index is >0
+    const realElements = Array.from(document.querySelectorAll(`.budgie-item-${this.budgieId}:not(.budgie-item-${this.budgieId}--duplicate)`));
+    const newElement = BudgieDom.createBudgieElement(this, this.items[index], index);
+
+    if(index > 0) {
+      realElements[index-1].insertAdjacentElement('afterend', newElement)
+    } else {
+      realElements[index].insertAdjacentElement('beforebegin', newElement)
     }
   }
 
