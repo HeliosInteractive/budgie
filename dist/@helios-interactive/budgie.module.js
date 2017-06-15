@@ -1,4 +1,4 @@
-/*Budgie ES6 Module v1.0.8*/
+/*Budgie ES6 Module v1.0.9*/
 export default Budgie = (function() {
 
 
@@ -224,7 +224,8 @@ var imageExtensions = [ "jpg", "gif", "png", "bmp", "jpeg" ], videoExtensions = 
                 element.parentNode.removeChild(element);
             }), Array.from(document.querySelectorAll(".budgie-item-" + this.budgieId + "--filler")).forEach(function(element) {
                 element.parentNode.removeChild(element);
-            }), this.prependStartingItems(), this.appendEndingItems(), this.numberLeftWithOddEnding() > 0 && (realElements[realElements.length - this.numberLeftWithOddEnding()].insertAdjacentElement("beforebegin", BudgieDom.createBudgieFillerElement(this)), 
+            }), this.options.infiniteScroll && (this.prependStartingItems(), this.appendEndingItems()), 
+            this.numberLeftWithOddEnding() > 0 && (realElements[realElements.length - this.numberLeftWithOddEnding()].insertAdjacentElement("beforebegin", BudgieDom.createBudgieFillerElement(this)), 
             realElements[realElements.length - 1].insertAdjacentElement("afterend", BudgieDom.createBudgieFillerElement(this))), 
             this.clearMeasurements(), this.budgieAnimate();
         }

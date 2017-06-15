@@ -253,9 +253,11 @@ class Budgie {
       element.parentNode.removeChild(element);
     })
 
-    // Insert duplicated elements anew
-    this.prependStartingItems();
-    this.appendEndingItems();
+    // Insert duplicated elements anew, if this is an infinite scroll
+    if(this.options.infiniteScroll) {
+      this.prependStartingItems();
+      this.appendEndingItems();
+    }
 
     // Add filler items to the end if needed
     if(this.numberLeftWithOddEnding() > 0) {
