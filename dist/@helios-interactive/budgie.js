@@ -84,11 +84,16 @@ var BudgieDom = Object.create({
     // Get the scroll property (scrollTop or scrollLeft)
     var scrollProperty = budgie.scrollProperty();
 
-    // Get a single budgie element's measure
-    var budgieElement = BudgieDom.measureElementWidthAndHeight('.budgie-item-' + budgie.budgieId);
+    // Get the containers measurement
+    var budgieContainer = BudgieDom.measureElementWidthAndHeight('.budgie-container-' + budgie.budgieId);
 
-    // Use width or height based on budgie direction
-    var budgieElementMeasure = budgie.isHorizontal() ? budgieElement.width : budgieElement.height;
+    // Derive the measurements of an individual element
+    var budgieElementMeasure = void 0;
+    if (budgie.isHorizontal()) {
+      budgieElementMeasure = budgieContainer.width / budgie.options.numberWide;
+    } else {
+      budgieElementMeasure = budgieContainer.height / budgie.options.numberHigh;
+    }
 
     // Set the scroll position to the top of the non-duped elements
     budgie.parentContainer[scrollProperty] = budgieElementMeasure;
@@ -692,6 +697,11 @@ var Budgie = function () {
       var realElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + ':not(.budgie-item-' + this.budgieId + '--duplicate)'));
       var newElement = BudgieDom.createBudgieElement(this, this.items[index], index);
 
+      // This allows for items to be added even if budgie is instantiated as empty
+      if (realElements.length === 0) {
+        realElements = Array.from(document.querySelectorAll('.budgie-item-' + this.budgieId + '--blank'));
+      }
+
       if (index > 0) {
         realElements[index - 1].insertAdjacentElement('afterend', newElement);
       } else {
@@ -1002,6 +1012,11 @@ var Budgie = function () {
 
       // Only animate if the elements do not all fit in the container
       if (!this.fitsInContainer()) {
+        // This effectively kick starts the scrolling. It's unclear why exactly it is needed,
+        // though it is related to scroll properties
+        this.budgieContainer.parentElement[scrollDirection] += 1;
+        this.budgieContainer.parentElement[scrollDirection] -= 1;
+
         this.interval = setInterval(function () {
           // Get the current value of the scroll
           currentScroll = _this7.budgieContainer.parentElement[scrollDirection];

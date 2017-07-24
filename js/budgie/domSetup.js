@@ -92,11 +92,16 @@ const BudgieDom = Object.create({
     // Get the scroll property (scrollTop or scrollLeft)
     let scrollProperty = budgie.scrollProperty();
 
-    // Get a single budgie element's measure
-    let budgieElement = BudgieDom.measureElementWidthAndHeight(`.budgie-item-${budgie.budgieId}`);
+    // Get the containers measurement
+    let budgieContainer = BudgieDom.measureElementWidthAndHeight(`.budgie-container-${budgie.budgieId}`)
 
-    // Use width or height based on budgie direction
-    let budgieElementMeasure = budgie.isHorizontal() ? budgieElement.width : budgieElement.height;
+    // Derive the measurements of an individual element
+    let budgieElementMeasure;
+    if(budgie.isHorizontal()) {
+      budgieElementMeasure = budgieContainer.width / budgie.options.numberWide;
+    } else {
+      budgieElementMeasure = budgieContainer.height / budgie.options.numberHigh;
+    }
 
     // Set the scroll position to the top of the non-duped elements
     budgie.parentContainer[scrollProperty] = budgieElementMeasure;

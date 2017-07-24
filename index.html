@@ -51,17 +51,19 @@
         'http://placehold.it/350x150/3330ff.jpg',
       ];
 
+      let emptyArray = [];
+
       let opts =           {
-        'numberHigh': 2,
-        'numberWide': 3,
-        'secondsOnPage': 2.0,
-        'direction': 'vertical',
+        'numberHigh': 1,
+        'numberWide': 5,
+        'secondsOnPage': 10.0,
+        'direction': 'horizontal',
         'autoScroll': true,
-        'infiniteScroll': true,
+//        'infiniteScroll': true,
         'inverted': true
       }
 
-      let a = new Budgie(sampleImages, '.main', opts);
+      let a = new Budgie(emptyArray, '.main', opts);
 
       // var r = Array.from(sampleImages)
       // r.shift()
