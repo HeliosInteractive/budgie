@@ -4,9 +4,11 @@ An infinite scrolling plugin, that tackles grid layout of the items being scroll
 
 ## Demos
 
-https://heliosinteractive.github.io/budgie/
+https://adammcfadden.github.io/budgie/
 
 ## Instalation
+
+**Install currently out of date. Will publish new npm package upon request.**
 
 ```$xslt
 npm install @helios-interactive/budgie --save
@@ -18,16 +20,16 @@ npm install @helios-interactive/budgie --save
 >
 > Budgie element refers to the whole element, with all items contained inside of it.
 >
-> Budgie item refers to a single items within the Budgie Element 
+> Budgie item refers to a single items within the Budgie Element
 
-Currently including the script file is the only way to use budgie. 
+Currently including the script file is the only way to use budgie.
 
 Budgie will be available in the global namespace once it has been included with the script tag
 ```
 <script src="node_modules/@helios-interactive/budgie/dist/budgie.min.js" type="text/javascript"></script>
 ```
 
-To create a Budgie element, you will need a list of items that you want to make up the tiles within the Budgie element. 
+To create a Budgie element, you will need a list of items that you want to make up the tiles within the Budgie element.
 You will also need to have an empty div on your page that will contain the Budgie element.
 You can also supply additional optional configuration as an options object
 ```
@@ -38,7 +40,7 @@ You can also supply additional optional configuration as an options object
 
 ### What can it display?
 
-Budgie accepts three types of content as Budgie items. 
+Budgie accepts three types of content as Budgie items.
 
 * Elements
     * Any HTMLElement can be passed as an item to budgie.
@@ -46,13 +48,13 @@ Budgie accepts three types of content as Budgie items.
     * The following extensions wil be created as images: ['jpg', 'gif', 'png', 'bmp', 'jpeg']
 * Videos - as a source string
     * The following extensions wil be created as videos: ['mp4','ogg', 'webm']
-    
+
 You can send the whole list as one of these types, or mix and match them as desired.
 
 ### How can I customize the styling?
 
-Budgie intentionally does very little with styling so that the user can have full control of that aspect. 
-All styles applied by budgie are applied as classes, so issues with specificty should be rare. 
+Budgie intentionally does very little with styling so that the user can have full control of that aspect.
+All styles applied by budgie are applied as classes, so issues with specificty should be rare.
 
 All Budgie items will have the class of `budgie-item`. You can use this to select the items and apply a class, or add your styling to that class.
 
@@ -62,8 +64,8 @@ The Budgie element will have a class of `budgie-container`
 
 Yep. Each Budgie will generate a code to keep it uniquely identified. This is stored on the Budgie object as `budgieId`
 
-If you have multiple budgie elements, then you can use the budgieId to select the one you want. 
-Budgie items will have the class `budgie-item-<budgieId>`. 
+If you have multiple budgie elements, then you can use the budgieId to select the one you want.
+Budgie items will have the class `budgie-item-<budgieId>`.
 The Budgie element will have the class `budgie-container-<budgieId>`
 
 ## Configuration
@@ -120,23 +122,23 @@ For more support add:
  - [classList pollyfill](https://github.com/eligrey/classList.js)
  - Flexbox pollyfill
  - forEach pollyfill
- 
+
 ## License
- 
+
  MIT License
- 
+
  Copyright (c) [2017] [Adam McFadden]
- 
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
