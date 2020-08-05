@@ -58,10 +58,12 @@ const BudgieDom = Object.create({
     const eleWidth = parseInt(window.getComputedStyle(budgie.budgieContainer).width);
 
     let numOfSheets = 0;
+    // select last sheet, which is the one we append. Needed for CORS compliance
+    let sheetIndex = document.styleSheets.length - 1;
 
     // If there are already cssRules declared, then set the correct number of sheets to allow for addition
-    if(document.styleSheets[0].cssRules) {
-      numOfSheets = document.styleSheets[0].cssRules.length;
+    if(document.styleSheets[sheetIndex].cssRules) {
+      numOfSheets = document.styleSheets[sheetIndex].cssRules.length;
     }
 
     // Take the larger of the two as the number across
@@ -74,16 +76,16 @@ const BudgieDom = Object.create({
     const height = (100 / budgie.options.numberHigh);
 
     // Set the width and height of a single budgie element
-    document.styleSheets[0].insertRule(
+    document.styleSheets[sheetIndex].insertRule(
       `.budgie-item-${budgie.budgieId}{width: ${width}%; height: ${height}%;}`, numOfSheets
     );
 
     // Create CSS rules for all possible configurations of filler elements
     for(let i = numberAcross - 1; i >= 0; i--){
-      document.styleSheets[0].insertRule(
+      document.styleSheets[sheetIndex].insertRule(
         `.budgie-item-${budgie.budgieId}--filler-${i}
         {
-          width: ${width*(budgie.options.numberWide - i)/2}%; 
+          width: ${width*(budgie.options.numberWide - i)/2}%;
           height: ${height*(budgie.options.numberHigh - i)/2}%; flex-grow: 1;
         }`,
         numOfSheets
@@ -93,16 +95,16 @@ const BudgieDom = Object.create({
     // Get the flex direction based on the budgie direction
     let direction = budgie.options.direction === 'horizontal' ? 'column' : 'row';
     // Set flex direction
-    document.styleSheets[0].insertRule(
+    document.styleSheets[sheetIndex].insertRule(
       `.budgie-container-${budgie.budgieId}{flex-direction: ${direction};}`,
       numOfSheets
     );
 
     // Set the overflow properties based on the budgie direction
-    document.styleSheets[0].insertRule(
+    document.styleSheets[sheetIndex].insertRule(
       `.budgie-container-parent-${budgie.budgieId}
       {
-        overflow-x: ${budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden'}; 
+        overflow-x: ${budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden'};
         overflow-y: ${budgie.options.direction === 'vertical' ? 'scroll' : 'hidden'}
       }`,
       numOfSheets
