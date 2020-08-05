@@ -1,4 +1,4 @@
-/*Budgie ES6 Module v1.0.11*/
+/*Budgie ES6 Module v1.0.12*/
 export default Budgie = (function() {
 
 
@@ -37,14 +37,14 @@ var imageExtensions = [ "jpg", "gif", "png", "bmp", "jpeg" ], videoExtensions = 
         budgie.parentContainer.appendChild(budgieFlexContainer), budgieFlexContainer;
     },
     setupBudgieCSS: function(budgie) {
-        var eleWidth = parseInt(window.getComputedStyle(budgie.budgieContainer).width), numOfSheets = 0;
-        document.styleSheets[0].cssRules && (numOfSheets = document.styleSheets[0].cssRules.length);
+        var eleWidth = parseInt(window.getComputedStyle(budgie.budgieContainer).width), numOfSheets = 0, sheetIndex = document.styleSheets.length - 1;
+        document.styleSheets[sheetIndex].cssRules && (numOfSheets = document.styleSheets[sheetIndex].cssRules.length);
         var numberAcross = budgie.options.numberHigh >= budgie.options.numberWide ? budgie.options.numberHigh : budgie.options.numberWide, width = eleWidth / budgie.options.numberWide / eleWidth * 100, height = 100 / budgie.options.numberHigh;
-        document.styleSheets[0].insertRule(".budgie-item-" + budgie.budgieId + "{width: " + width + "%; height: " + height + "%;}", numOfSheets);
-        for (var i = numberAcross - 1; i >= 0; i--) document.styleSheets[0].insertRule(".budgie-item-" + budgie.budgieId + "--filler-" + i + "\n        {\n          width: " + width * (budgie.options.numberWide - i) / 2 + "%; \n          height: " + height * (budgie.options.numberHigh - i) / 2 + "%; flex-grow: 1;\n        }", numOfSheets);
+        document.styleSheets[sheetIndex].insertRule(".budgie-item-" + budgie.budgieId + "{width: " + width + "%; height: " + height + "%;}", numOfSheets);
+        for (var i = numberAcross - 1; i >= 0; i--) document.styleSheets[sheetIndex].insertRule(".budgie-item-" + budgie.budgieId + "--filler-" + i + "\n        {\n          width: " + width * (budgie.options.numberWide - i) / 2 + "%;\n          height: " + height * (budgie.options.numberHigh - i) / 2 + "%; flex-grow: 1;\n        }", numOfSheets);
         var direction = "horizontal" === budgie.options.direction ? "column" : "row";
-        document.styleSheets[0].insertRule(".budgie-container-" + budgie.budgieId + "{flex-direction: " + direction + ";}", numOfSheets), 
-        document.styleSheets[0].insertRule(".budgie-container-parent-" + budgie.budgieId + "\n      {\n        overflow-x: " + ("horizontal" === budgie.options.direction ? "scroll" : "hidden") + "; \n        overflow-y: " + ("vertical" === budgie.options.direction ? "scroll" : "hidden") + "\n      }", numOfSheets);
+        document.styleSheets[sheetIndex].insertRule(".budgie-container-" + budgie.budgieId + "{flex-direction: " + direction + ";}", numOfSheets), 
+        document.styleSheets[sheetIndex].insertRule(".budgie-container-parent-" + budgie.budgieId + "\n      {\n        overflow-x: " + ("horizontal" === budgie.options.direction ? "scroll" : "hidden") + ";\n        overflow-y: " + ("vertical" === budgie.options.direction ? "scroll" : "hidden") + "\n      }", numOfSheets);
     },
     setupBudgieScrollProperties: function(budgie) {
         var scrollProperty = budgie.scrollProperty(), budgieContainer = BudgieDom.measureElementWidthAndHeight(".budgie-container-" + budgie.budgieId), budgieElementMeasure = void 0;

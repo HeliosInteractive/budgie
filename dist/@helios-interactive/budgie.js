@@ -45,10 +45,12 @@ var BudgieDom = Object.create({
     var eleWidth = parseInt(window.getComputedStyle(budgie.budgieContainer).width);
 
     var numOfSheets = 0;
+    // select last sheet, which is the one we append. Needed for CORS compliance
+    var sheetIndex = document.styleSheets.length - 1;
 
     // If there are already cssRules declared, then set the correct number of sheets to allow for addition
-    if (document.styleSheets[0].cssRules) {
-      numOfSheets = document.styleSheets[0].cssRules.length;
+    if (document.styleSheets[sheetIndex].cssRules) {
+      numOfSheets = document.styleSheets[sheetIndex].cssRules.length;
     }
 
     // Take the larger of the two as the number across
@@ -60,20 +62,20 @@ var BudgieDom = Object.create({
     var height = 100 / budgie.options.numberHigh;
 
     // Set the width and height of a single budgie element
-    document.styleSheets[0].insertRule('.budgie-item-' + budgie.budgieId + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
+    document.styleSheets[sheetIndex].insertRule('.budgie-item-' + budgie.budgieId + '{width: ' + width + '%; height: ' + height + '%;}', numOfSheets);
 
     // Create CSS rules for all possible configurations of filler elements
     for (var i = numberAcross - 1; i >= 0; i--) {
-      document.styleSheets[0].insertRule('.budgie-item-' + budgie.budgieId + '--filler-' + i + '\n        {\n          width: ' + width * (budgie.options.numberWide - i) / 2 + '%; \n          height: ' + height * (budgie.options.numberHigh - i) / 2 + '%; flex-grow: 1;\n        }', numOfSheets);
+      document.styleSheets[sheetIndex].insertRule('.budgie-item-' + budgie.budgieId + '--filler-' + i + '\n        {\n          width: ' + width * (budgie.options.numberWide - i) / 2 + '%;\n          height: ' + height * (budgie.options.numberHigh - i) / 2 + '%; flex-grow: 1;\n        }', numOfSheets);
     }
 
     // Get the flex direction based on the budgie direction
     var direction = budgie.options.direction === 'horizontal' ? 'column' : 'row';
     // Set flex direction
-    document.styleSheets[0].insertRule('.budgie-container-' + budgie.budgieId + '{flex-direction: ' + direction + ';}', numOfSheets);
+    document.styleSheets[sheetIndex].insertRule('.budgie-container-' + budgie.budgieId + '{flex-direction: ' + direction + ';}', numOfSheets);
 
     // Set the overflow properties based on the budgie direction
-    document.styleSheets[0].insertRule('.budgie-container-parent-' + budgie.budgieId + '\n      {\n        overflow-x: ' + (budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden') + '; \n        overflow-y: ' + (budgie.options.direction === 'vertical' ? 'scroll' : 'hidden') + '\n      }', numOfSheets);
+    document.styleSheets[sheetIndex].insertRule('.budgie-container-parent-' + budgie.budgieId + '\n      {\n        overflow-x: ' + (budgie.options.direction === 'horizontal' ? 'scroll' : 'hidden') + ';\n        overflow-y: ' + (budgie.options.direction === 'vertical' ? 'scroll' : 'hidden') + '\n      }', numOfSheets);
   },
 
   /**
